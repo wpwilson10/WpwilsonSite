@@ -33,7 +33,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
         # Validate the HTTP method
         http_method: str = event.get("requestContext", {}).get("http", {}).get("method")
-        if http_method != "PUT":
+        if http_method != "POST":
             return {
                 "statusCode": 405,
                 "body": json.dumps({"error": "Only PUT method is allowed."}),
