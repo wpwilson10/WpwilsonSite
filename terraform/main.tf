@@ -183,121 +183,9 @@ module "cloudfront_route53_record" {
   depends_on = [module.cloudfront]
 }
 
-##############################################################
-# S3 Bucket - Hosts lighting functionality configuration file
-##############################################################
-
-module "lights_config_s3_bucket" {
-  source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.2.2"
-
-  bucket_prefix = lower("${var.project_name}-lights-config-")
-  force_destroy = true
-}
-
-#######################################################################
-# Lambda functions - Implements light scheduling configuration updates
-#######################################################################
-
-# Function that receives HTTPS POSTS from the client website and updates the lighting schedule configuration file
-module "lights_post_lambda" {
-  source        = "terraform-aws-modules/lambda/aws"
-  version       = "7.17.0"
-  handler       = local.lambda_handler
-  runtime       = local.lambda_runtime
-  architectures = local.lambda_architecture
-
-  function_name                     = "${var.project_name}-Lights-Config-POST"
-  description                       = "REST endpoint for updating lighting schedule configuration file."
-  source_path                       = var.lights_lambda_post_file_directory
-  publish                           = true
-  cloudwatch_logs_retention_in_days = 90
-
-  # matches variables used in function code
-  environment_variables = {
-    CONFIG_BUCKET_NAME = module.lights_config_s3_bucket.s3_bucket_id # use the generated name with prefix
-    CONFIG_KEY_NAME    = local.lights_config_s3_key_name
-  }
-
-  # allow API Gateway to call the function
-  allowed_triggers = {
-    APIGatewayLights = {
-      service    = "apigateway"
-      source_arn = "${module.api_gateway.api_execution_arn}/*/*"
-    }
-  }
-
-  # allow access to the config s3 bucket
-  attach_policy = true
-  policy        = aws_iam_policy.lambda_s3_access_policy.arn
-}
-
-# Function that receives HTTPS GETS from the client website and returns the lighting schedule configuration file
-module "lights_get_lambda" {
-  source        = "terraform-aws-modules/lambda/aws"
-  version       = "7.17.0"
-  handler       = local.lambda_handler
-  runtime       = local.lambda_runtime
-  architectures = local.lambda_architecture
-
-  function_name                     = "${var.project_name}-Lights-Config-GET"
-  description                       = "REST endpoint for retrieving the lighting schedule configuration file."
-  source_path                       = var.lights_lambda_get_file_directory
-  publish                           = true
-  cloudwatch_logs_retention_in_days = 90
-
-  # matches variables used in function code
-  environment_variables = {
-    CONFIG_BUCKET_NAME = module.lights_config_s3_bucket.s3_bucket_id # use the generated name with prefix
-    CONFIG_KEY_NAME    = local.lights_config_s3_key_name
-  }
-
-  # allow API Gateway to call the function
-  allowed_triggers = {
-    APIGatewayLights = {
-      service    = "apigateway"
-      source_arn = "${module.api_gateway.api_execution_arn}/*/*"
-    }
-  }
-
-  # allow access to the config s3 bucket
-  attach_policy = true
-  policy        = aws_iam_policy.lambda_s3_access_policy.arn
-}
-
-# "IAM policy allowing light scheduling Lambda functions to access the configuration S3 bucket"
-resource "aws_iam_policy" "lambda_s3_access_policy" {
-  name        = "${var.project_name}-lambda-s3-access-policy"
-  description = "IAM policy allowing light scheduling Lambda functions to access the configuration S3 bucket"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "AllowGetConfig",
-        Effect = "Allow",
-        Action = [
-          "s3:GetObject",
-          "s3:ListBucket"
-        ],
-        Resource = [
-          "arn:aws:s3:::${module.lights_config_s3_bucket.s3_bucket_id}",
-          "arn:aws:s3:::${module.lights_config_s3_bucket.s3_bucket_id}/*"
-        ]
-      },
-      {
-        Sid      = "AllowPutConfig",
-        Effect   = "Allow",
-        Action   = "s3:PutObject",
-        Resource = "arn:aws:s3:::${module.lights_config_s3_bucket.s3_bucket_id}/*"
-      }
-    ]
-  })
-}
-
 ####################################################
 # API Gateway - Connects Client to Lambda Functions
-# Currently only implements the lights backend
+# Routes & Integrations added in other modules
 ####################################################
 
 module "api_gateway" {
@@ -321,23 +209,6 @@ module "api_gateway" {
     allow_headers = ["content-type"]
     allow_methods = ["GET", "OPTIONS", "POST"]
     allow_origins = [local.site_URL, "http://${module.client_files_s3_bucket.s3_bucket_website_endpoint}"]
-  }
-
-  # Routes & Integration(s)
-  routes = {
-    "POST /${var.lights_api_route}" = {
-      integration = {
-        uri                    = module.lights_post_lambda.lambda_function_arn
-        payload_format_version = "2.0"
-      }
-    }
-
-    "GET /${var.lights_api_route}" = {
-      integration = {
-        uri                    = module.lights_get_lambda.lambda_function_arn
-        payload_format_version = "2.0"
-      }
-    }
   }
 
   # Fixes - Error: no matching Route 53 Hosted Zone found
