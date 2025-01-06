@@ -1,5 +1,27 @@
 'use client';
 
+/**
+ * The LightScheduler component that manages the light control interface.
+ *
+ * This component displays an interface for managing smart light settings, including schedule
+ * management and mode selection. The component allows users to:
+ * - Switch between different lighting modes (Day/Night Cycle, Scheduled, Demo)
+ * - View and edit the current light schedule
+ * - Add new schedule entries with specific times and brightness levels
+ * - Remove existing schedule entries
+ * - Save changes to the server
+ *
+ * The component displays feedback notifications for successful or unsuccessful
+ * save operations and uses a loading spinner while fetching data from the server.
+ * The schedule interface is only shown when not in demo mode, and all changes
+ * are validated before being saved.
+ *
+ * @module components/LightScheduler
+ * @component LightScheduler
+ * @param {Object} props The props passed to the component. (Currently empty)
+ * @returns {ReactElement} The LightScheduler component.
+ */
+
 import { Suspense, useEffect, useState } from 'react';
 import {
   Table,
@@ -19,7 +41,15 @@ import LoadingSpinner from '../LoadingSpinner/spinner';
 const lightScheduleURL: string =
   process.env.API_DOMAIN_NAME! + process.env.LIGHT_SCHEDULE_API!;
 
-// Define an interface for the schedule entries
+/**
+ * Represents a single entry in the light schedule.
+ *
+ * @interface ScheduleEntry
+ * @property {number} id - The unique identifier for the schedule entry.
+ * @property {string} time - The time of day for this schedule entry in 24-hour format (HH:MM).
+ * @property {number} warmBrightness - The brightness level for warm light (0-100).
+ * @property {number} coolBrightness - The brightness level for cool light (0-100).
+ */
 interface ScheduleEntry {
   id: number;
   time: string;
@@ -27,12 +57,27 @@ interface ScheduleEntry {
   coolBrightness: number;
 }
 
-// Define an interface for the server data structure
+/**
+ * Represents the complete light schedule data structure.
+ *
+ * @interface ScheduleData
+ * @property {'dayNight' | 'scheduled' | 'demo'} mode - The current operating mode for the lights.
+ *    - 'dayNight': Automatically adjusts based on time of day
+ *    - 'scheduled': Follows the user-defined schedule
+ *    - 'demo': Runs a demonstration cycle
+ * @property {ScheduleEntry[]} schedule - Array of schedule entries that define the light settings throughout the day.
+ */
 interface ScheduleData {
   mode: 'dayNight' | 'scheduled' | 'demo';
   schedule: ScheduleEntry[];
 }
 
+/**
+ * Validates the schedule data received from the server.
+ *
+ * @param {any} data - The data to validate.
+ * @returns {boolean} - True if the data is valid, false otherwise.
+ */
 const isValidScheduleData = (data: any): data is ScheduleData => {
   // Validate the mode
   const isValidMode = ['dayNight', 'scheduled', 'demo'].includes(data?.mode);
@@ -54,6 +99,16 @@ const isValidScheduleData = (data: any): data is ScheduleData => {
   return isValidMode && isValidSchedule;
 };
 
+/**
+ * The ScheduleTable component that displays the schedule entries in a table.
+ *
+ * @component
+ * @param {Object} props - The props passed to the component.
+ * @param {ScheduleData} props.data - The schedule data.
+ * @param {Function} props.handleInputChange - The function to handle input changes.
+ * @param {Function} props.handleRemoveRow - The function to handle row removal.
+ * @returns {ReactElement} The ScheduleTable component.
+ */
 const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
   <Row className="justify-content-md-left">
     <Table striped bordered hover className="mb-3">
@@ -107,6 +162,20 @@ const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
   </Row>
 );
 
+/**
+ * The AddRowForm component that displays a form to add a new schedule entry.
+ *
+ * @component
+ * @param {Object} props - The props passed to the component.
+ * @param {string} props.newTime - The new time value.
+ * @param {string} props.newWarmBrightness - The new warm brightness value.
+ * @param {string} props.newCoolBrightness - The new cool brightness value.
+ * @param {Function} props.setNewTime - The function to set the new time value.
+ * @param {Function} props.setNewWarmBrightness - The function to set the new warm brightness value.
+ * @param {Function} props.setNewCoolBrightness - The function to set the new cool brightness value.
+ * @param {Function} props.handleAddRow - The function to handle adding a new row.
+ * @returns {ReactElement} The AddRowForm component.
+ */
 const AddRowForm = ({
   newTime,
   newWarmBrightness,
@@ -149,6 +218,15 @@ const AddRowForm = ({
   </Row>
 );
 
+/**
+ * The ModeSelector component that displays buttons to select the mode.
+ *
+ * @component
+ * @param {Object} props - The props passed to the component.
+ * @param {ScheduleData} props.data - The schedule data.
+ * @param {Function} props.handleModeChange - The function to handle mode changes.
+ * @returns {ReactElement} The ModeSelector component.
+ */
 const ModeSelector = ({ data, handleModeChange }: any) => (
   <Row className="justify-content-start">
     <Col xs="auto" md="auto" className="mb-3">
@@ -178,6 +256,16 @@ const ModeSelector = ({ data, handleModeChange }: any) => (
   </Row>
 );
 
+/**
+ * The LightScheduler component that displays the light scheduler interface.
+ *
+ * This component allows the user to view and edit the light schedule, including adding,
+ * removing, and updating schedule entries. The component also allows the user to switch
+ * between different modes (dayNight, scheduled, demo) and save the changes to the server.
+ *
+ * @component
+ * @returns {ReactElement} The LightScheduler component.
+ */
 const LightScheduler = () => {
   const [data, setData] = useState<ScheduleData>({
     mode: 'scheduled',
@@ -229,6 +317,9 @@ const LightScheduler = () => {
     return undefined;
   }, [isSubmissionError]);
 
+  /**
+   * Saves the schedule to the server.
+   */
   const saveSchedule = async () => {
     try {
       await axios.post(lightScheduleURL, data);
@@ -242,6 +333,13 @@ const LightScheduler = () => {
     }
   };
 
+  /**
+   * Handles input changes for schedule entries.
+   *
+   * @param {number} id - The ID of the schedule entry.
+   * @param {'warmBrightness' | 'coolBrightness'} type - The type of brightness to update.
+   * @param {string} value - The new value.
+   */
   const handleInputChange = (
     id: number,
     type: 'warmBrightness' | 'coolBrightness',
@@ -259,12 +357,20 @@ const LightScheduler = () => {
     setUnsavedChanges(true);
   };
 
+  /**
+   * Handles removing a schedule entry.
+   *
+   * @param {number} id - The ID of the schedule entry to remove.
+   */
   const handleRemoveRow = (id: number) => {
     const updatedSchedule = data.schedule.filter((entry) => entry.id !== id);
     setData({ ...data, schedule: updatedSchedule });
     setUnsavedChanges(true);
   };
 
+  /**
+   * Handles adding a new schedule entry.
+   */
   const handleAddRow = () => {
     if (newTime && newWarmBrightness !== '' && newCoolBrightness !== '') {
       const newRow: ScheduleEntry = {
@@ -284,6 +390,11 @@ const LightScheduler = () => {
     }
   };
 
+  /**
+   * Handles changing the mode.
+   *
+   * @param {'dayNight' | 'scheduled' | 'demo'} newMode - The new mode to set.
+   */
   const handleModeChange = (newMode: 'dayNight' | 'scheduled' | 'demo') => {
     setData({ ...data, mode: newMode });
     setUnsavedChanges(true);
