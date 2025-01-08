@@ -49,12 +49,14 @@ const lightScheduleURL: string =
  * @property {string} time - The time of day for this schedule entry in 24-hour format (HH:MM).
  * @property {number} warmBrightness - The brightness level for warm light (0-100).
  * @property {number} coolBrightness - The brightness level for cool light (0-100).
+ * @property {number} unix_time - The Unix timestamp for this schedule entry.
  */
 interface ScheduleEntry {
   id: number;
   time: string;
   warmBrightness: number;
   coolBrightness: number;
+  unix_time: number;
 }
 
 /**
@@ -66,10 +68,18 @@ interface ScheduleEntry {
  *    - 'scheduled': Follows the user-defined schedule
  *    - 'demo': Runs a demonstration cycle
  * @property {ScheduleEntry[]} schedule - Array of schedule entries that define the light settings throughout the day.
+ * @property {string} sunrise - The time of sunrise in 24-hour format (HH:MM).
+ * @property {string} sunset - The time of sunset in 24-hour format (HH:MM).
+ * @property {number} sunrise_unix - The Unix timestamp for sunrise.
+ * @property {number} sunset_unix - The Unix timestamp for sunset.
  */
 interface ScheduleData {
   mode: 'dayNight' | 'scheduled' | 'demo';
   schedule: ScheduleEntry[];
+  sunrise: string;
+  sunset: string;
+  sunrise_unix: number;
+  sunset_unix: number;
 }
 
 /**
@@ -93,10 +103,27 @@ const isValidScheduleData = (data: any): data is ScheduleData => {
         entry.warmBrightness <= 100 &&
         typeof entry.coolBrightness === 'number' &&
         entry.coolBrightness >= 0 &&
-        entry.coolBrightness <= 100
+        entry.coolBrightness <= 100 &&
+        typeof entry.unix_time === 'number'
     );
 
-  return isValidMode && isValidSchedule;
+  const isValidSunData =
+    typeof data?.sunrise === 'string' &&
+    typeof data?.sunset === 'string' &&
+    typeof data?.sunrise_unix === 'number' &&
+    typeof data?.sunset_unix === 'number';
+
+  return isValidMode && isValidSchedule && isValidSunData;
+};
+
+/**
+ * Formats a 24-hour time string (HH:mm) to 12-hour format (h:mm tt)
+ */
+const formatTime = (time: string): string => {
+  const [hours, minutes] = time.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hour12 = hours % 12 || 12;
+  return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
 };
 
 /**
@@ -123,7 +150,7 @@ const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
       <tbody>
         {data.schedule.map((entry: ScheduleEntry) => (
           <tr key={entry.id}>
-            <td>{entry.time}</td>
+            <td>{formatTime(entry.time)}</td>
             <td>
               <Form.Control
                 type="number"
@@ -270,6 +297,10 @@ const LightScheduler = () => {
   const [data, setData] = useState<ScheduleData>({
     mode: 'scheduled',
     schedule: [],
+    sunrise: '',
+    sunset: '',
+    sunrise_unix: 0,
+    sunset_unix: 0,
   });
   const [newTime, setNewTime] = useState('');
   const [newWarmBrightness, setNewWarmBrightness] = useState('');
@@ -278,6 +309,7 @@ const LightScheduler = () => {
   const [isSuccessfullySubmitted, setIsSuccessfullySubmitted] = useState(false);
   const [isSubmissionError, setIsSubmissionError] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [lastSavedData, setLastSavedData] = useState<ScheduleData | null>(null);
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -285,6 +317,7 @@ const LightScheduler = () => {
         const response = await axios.get<ScheduleData>(lightScheduleURL);
         if (isValidScheduleData(response.data)) {
           setData(response.data);
+          setLastSavedData(response.data); // Store initial data
         } else {
           console.error('Invalid schedule data format', response.data);
         }
@@ -323,6 +356,7 @@ const LightScheduler = () => {
   const saveSchedule = async () => {
     try {
       await axios.post(lightScheduleURL, data);
+      setLastSavedData(data); // Update last saved data
       setIsSubmissionError(false);
       setIsSuccessfullySubmitted(true);
       setUnsavedChanges(false);
@@ -330,6 +364,13 @@ const LightScheduler = () => {
       handleAxiosError(error);
       setIsSubmissionError(true);
       setIsSuccessfullySubmitted(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (lastSavedData) {
+      setData(lastSavedData);
+      setUnsavedChanges(false);
     }
   };
 
@@ -378,6 +419,9 @@ const LightScheduler = () => {
         time: newTime,
         warmBrightness: Math.min(100, Math.max(0, Number(newWarmBrightness))),
         coolBrightness: Math.min(100, Math.max(0, Number(newCoolBrightness))),
+        unix_time: Math.floor(
+          new Date(`1970-01-01T${newTime}`).getTime() / 1000
+        ),
       };
       const updatedSchedule = [...data.schedule, newRow].sort((a, b) =>
         a.time.localeCompare(b.time)
@@ -425,6 +469,14 @@ const LightScheduler = () => {
                     </p>
                   </Alert>
                 )}
+                {unsavedChanges && (
+                  <Alert variant="warning">
+                    <p className="mb-0">
+                      You have unsaved changes. Don't forget to save your
+                      changes!
+                    </p>
+                  </Alert>
+                )}
               </Col>
             </Row>
 
@@ -451,7 +503,14 @@ const LightScheduler = () => {
             )}
 
             <Row className="justify-content-md-left">
-              <Col md={12} className="mb-3 d-flex justify-content-end">
+              <Col md={12} className="mb-3 d-flex justify-content-end gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={handleCancel}
+                  disabled={!unsavedChanges}
+                >
+                  Cancel
+                </Button>
                 <Button
                   variant="success"
                   onClick={() => saveSchedule()}
