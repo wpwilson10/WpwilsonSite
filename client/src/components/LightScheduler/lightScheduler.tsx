@@ -45,14 +45,12 @@ const lightScheduleURL: string =
  * Represents a single entry in the light schedule.
  *
  * @interface ScheduleEntry
- * @property {number} id - The unique identifier for the schedule entry.
  * @property {string} time - The time of day for this schedule entry in 24-hour format (HH:MM).
  * @property {number} warmBrightness - The brightness level for warm light (0-100).
  * @property {number} coolBrightness - The brightness level for cool light (0-100).
  * @property {number} unix_time - The Unix timestamp for this schedule entry.
  */
 interface ScheduleEntry {
-  id: number;
   time: string;
   warmBrightness: number;
   coolBrightness: number;
@@ -68,18 +66,26 @@ interface ScheduleEntry {
  *    - 'scheduled': Follows the user-defined schedule
  *    - 'demo': Runs a demonstration cycle
  * @property {ScheduleEntry[]} schedule - Array of schedule entries that define the light settings throughout the day.
- * @property {string} sunrise - The time of sunrise in 24-hour format (HH:MM).
- * @property {string} sunset - The time of sunset in 24-hour format (HH:MM).
- * @property {number} sunrise_unix - The Unix timestamp for sunrise.
- * @property {number} sunset_unix - The Unix timestamp for sunset.
+ * @property {ScheduleEntry} sunrise - The sunrise schedule entry.
+ * @property {ScheduleEntry} sunset - The sunset schedule entry.
+ * @property {ScheduleEntry} natural_sunset - The natural sunset schedule entry.
+ * @property {ScheduleEntry} civil_twilight_begin - The civil twilight begin schedule entry.
+ * @property {ScheduleEntry} civil_twilight_end - The civil twilight end schedule entry.
+ * @property {ScheduleEntry} natural_twilight_end - The natural twilight end schedule entry.
+ * @property {ScheduleEntry} bed_time - The bed time schedule entry.
+ * @property {ScheduleEntry} night_time - The night time schedule entry.
  */
 interface ScheduleData {
   mode: 'dayNight' | 'scheduled' | 'demo';
   schedule: ScheduleEntry[];
-  sunrise: string;
-  sunset: string;
-  sunrise_unix: number;
-  sunset_unix: number;
+  sunrise: ScheduleEntry;
+  sunset: ScheduleEntry;
+  natural_sunset: ScheduleEntry;
+  civil_twilight_begin: ScheduleEntry;
+  civil_twilight_end: ScheduleEntry;
+  natural_twilight_end: ScheduleEntry;
+  bed_time: ScheduleEntry;
+  night_time: ScheduleEntry;
 }
 
 /**
@@ -89,31 +95,40 @@ interface ScheduleData {
  * @returns {boolean} - True if the data is valid, false otherwise.
  */
 const isValidScheduleData = (data: any): data is ScheduleData => {
-  // Validate the mode
   const isValidMode = ['dayNight', 'scheduled', 'demo'].includes(data?.mode);
-  // Validate the schedule array
+
+  const isValidEntry = (entry: any): entry is ScheduleEntry =>
+    typeof entry?.time === 'string' &&
+    typeof entry?.unix_time === 'number' &&
+    typeof entry?.warmBrightness === 'number' &&
+    entry.warmBrightness >= 0 &&
+    entry.warmBrightness <= 100 &&
+    typeof entry?.coolBrightness === 'number' &&
+    entry.coolBrightness >= 0 &&
+    entry.coolBrightness <= 100;
+
   const isValidSchedule =
     Array.isArray(data?.schedule) &&
-    data.schedule.every(
-      (entry: any) =>
-        typeof entry.id === 'number' &&
-        typeof entry.time === 'string' &&
-        typeof entry.warmBrightness === 'number' &&
-        entry.warmBrightness >= 0 &&
-        entry.warmBrightness <= 100 &&
-        typeof entry.coolBrightness === 'number' &&
-        entry.coolBrightness >= 0 &&
-        entry.coolBrightness <= 100 &&
-        typeof entry.unix_time === 'number'
+    data.schedule.every((entry: any) =>
+      isValidEntry({ ...entry, id: entry.id })
     );
 
-  const isValidSunData =
-    typeof data?.sunrise === 'string' &&
-    typeof data?.sunset === 'string' &&
-    typeof data?.sunrise_unix === 'number' &&
-    typeof data?.sunset_unix === 'number';
+  const requiredEntries = [
+    'sunrise',
+    'sunset',
+    'natural_sunset',
+    'civil_twilight_begin',
+    'civil_twilight_end',
+    'natural_twilight_end',
+    'bed_time',
+    'night_time',
+  ];
 
-  return isValidMode && isValidSchedule && isValidSunData;
+  const hasValidEntries = requiredEntries.every(
+    (key) => data?.[key] && isValidEntry(data[key])
+  );
+
+  return isValidMode && isValidSchedule && hasValidEntries;
 };
 
 /**
@@ -151,7 +166,7 @@ const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
         </thead>
         <tbody>
           {data.schedule.map((entry: ScheduleEntry) => (
-            <tr key={entry.id}>
+            <tr key={entry.unix_time}>
               <td>{formatTime(entry.time)}</td>
               <td>
                 <Form.Control
@@ -161,7 +176,7 @@ const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
                   max="100"
                   onChange={(e) =>
                     handleInputChange(
-                      entry.id,
+                      entry.unix_time,
                       'warmBrightness',
                       e.target.value
                     )
@@ -176,7 +191,7 @@ const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
                   max="100"
                   onChange={(e) =>
                     handleInputChange(
-                      entry.id,
+                      entry.unix_time,
                       'coolBrightness',
                       e.target.value
                     )
@@ -187,7 +202,7 @@ const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
                 <Button
                   variant="danger"
                   size="sm"
-                  onClick={() => handleRemoveRow(entry.id)}
+                  onClick={() => handleRemoveRow(entry.unix_time)}
                 >
                   X
                 </Button>
@@ -304,29 +319,116 @@ const ModeSelector = ({ data, handleModeChange }: any) => (
  *
  * @component
  * @param {Object} props - The props passed to the component.
- * @param {string} props.sunrise - The sunrise time.
- * @param {string} props.sunset - The sunset time.
+ * @param {ScheduleEntry} props.sunrise - The sunrise time.
+ * @param {ScheduleEntry} props.sunset - The sunset time.
+ * @param {ScheduleEntry} props.natural_sunset - The natural sunset time.
+ * @param {ScheduleEntry} props.civil_twilight_begin - The civil twilight begin time.
+ * @param {ScheduleEntry} props.civil_twilight_end - The civil twilight end time.
+ * @param {ScheduleEntry} props.natural_twilight_end - The natural twilight end time.
  * @returns {ReactElement} The SunTimes component.
  */
-const SunTimes = ({ sunrise, sunset }: { sunrise: string; sunset: string }) => (
+const SunTimes = ({
+  sunrise,
+  sunset,
+  natural_sunset,
+  civil_twilight_begin,
+  civil_twilight_end,
+  natural_twilight_end,
+}: {
+  sunrise: ScheduleEntry;
+  sunset: ScheduleEntry;
+  natural_sunset: ScheduleEntry;
+  civil_twilight_begin: ScheduleEntry;
+  civil_twilight_end: ScheduleEntry;
+  natural_twilight_end: ScheduleEntry;
+}) => (
   <Container className="content-container mb-3 py-3 px-3">
     <h5>Day/Night Schedule</h5>
     <Row>
-      <Col xs={12} md={6} className="mb-2 mb-md-0">
+      <Col xs={12} md={6} className="mb-2">
         <div>
-          <div className="text-muted small">Sunrise</div>
-          <div className="fs-5">{formatTime(sunrise)}</div>
+          <div className="text-muted small">Dawn</div>
+          <div className="fs-5">{formatTime(civil_twilight_begin.time)}</div>
         </div>
       </Col>
-      <Col xs={12} md={6}>
+      <Col xs={12} md={6} className="mb-2">
+        <div>
+          <div className="text-muted small">Sunrise</div>
+          <div className="fs-5">{formatTime(sunrise.time)}</div>
+        </div>
+      </Col>
+      <Col xs={12} md={6} className="mb-2">
         <div>
           <div className="text-muted small">Sunset</div>
-          <div className="fs-5">{formatTime(sunset)}</div>
+          <div className="fs-5">
+            {formatTime(natural_sunset.time)}
+            {natural_sunset.time !== sunset.time && (
+              <span className="text-muted small ms-2">
+                ({formatTime(sunset.time)} Adjusted)
+              </span>
+            )}
+          </div>
+        </div>
+      </Col>
+      <Col xs={12} md={6} className="mb-2">
+        <div>
+          <div className="text-muted small">Dusk</div>
+          <div className="fs-5">
+            {formatTime(natural_twilight_end.time)}
+            {natural_twilight_end.time !== civil_twilight_end.time && (
+              <span className="text-muted small ms-2">
+                ({formatTime(civil_twilight_end.time)} Adjusted)
+              </span>
+            )}
+          </div>
         </div>
       </Col>
     </Row>
   </Container>
 );
+
+/**
+ * The DaylightScheduleTable component that displays the named schedule entries in a table.
+ */
+const DaylightScheduleTable = ({ data }: { data: ScheduleData }) => {
+  // Define the entries to show and their labels
+  const scheduleEntries = [
+    { key: 'civil_twilight_begin', label: 'Dawn' },
+    { key: 'sunrise', label: 'Sunrise' },
+    { key: 'sunset', label: 'Sunset' },
+    { key: 'civil_twilight_end', label: 'Dusk' },
+    { key: 'bed_time', label: 'Bed Time' },
+    { key: 'night_time', label: 'Night Time' },
+  ] as const;
+
+  return (
+    <Container className="content-container mb-3 py-3 px-3">
+      <h5>Daylight Schedule</h5>
+      <Row>
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Time</th>
+              <th>Warm Brightness</th>
+              <th>Cool Brightness</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scheduleEntries.map(({ key, label }) => (
+              <tr key={key}>
+                <td>{label}</td>
+                <td>{formatTime(data[key].time)}</td>
+                <td>{data[key].warmBrightness}%</td>
+                <td>{data[key].coolBrightness}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Row>
+    </Container>
+  );
+};
 
 /**
  * The LightScheduler component that displays the light scheduler interface.
@@ -342,10 +444,39 @@ const LightScheduler = () => {
   const [data, setData] = useState<ScheduleData>({
     mode: 'scheduled',
     schedule: [],
-    sunrise: '',
-    sunset: '',
-    sunrise_unix: 0,
-    sunset_unix: 0,
+    sunrise: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+    sunset: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+    natural_sunset: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
+    civil_twilight_begin: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
+    civil_twilight_end: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
+    natural_twilight_end: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
+    bed_time: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+    night_time: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
   });
   const [newTime, setNewTime] = useState('');
   const [newWarmBrightness, setNewWarmBrightness] = useState('');
@@ -422,17 +553,17 @@ const LightScheduler = () => {
   /**
    * Handles input changes for schedule entries.
    *
-   * @param {number} id - The ID of the schedule entry.
+   * @param {number} unix_time - The Unix timestamp of the schedule entry.
    * @param {'warmBrightness' | 'coolBrightness'} type - The type of brightness to update.
    * @param {string} value - The new value.
    */
   const handleInputChange = (
-    id: number,
+    unix_time: number,
     type: 'warmBrightness' | 'coolBrightness',
     value: string
   ) => {
     const updatedSchedule = data.schedule.map((entry) =>
-      entry.id === id
+      entry.unix_time === unix_time
         ? {
             ...entry,
             [type]: Math.min(100, Math.max(0, Number(value))),
@@ -446,10 +577,12 @@ const LightScheduler = () => {
   /**
    * Handles removing a schedule entry.
    *
-   * @param {number} id - The ID of the schedule entry to remove.
+   * @param {number} unix_time - The Unix timestamp of the schedule entry to remove.
    */
-  const handleRemoveRow = (id: number) => {
-    const updatedSchedule = data.schedule.filter((entry) => entry.id !== id);
+  const handleRemoveRow = (unix_time: number) => {
+    const updatedSchedule = data.schedule.filter(
+      (entry) => entry.unix_time !== unix_time
+    );
     setData({ ...data, schedule: updatedSchedule });
     setUnsavedChanges(true);
   };
@@ -460,7 +593,6 @@ const LightScheduler = () => {
   const handleAddRow = () => {
     if (newTime && newWarmBrightness !== '' && newCoolBrightness !== '') {
       const newRow: ScheduleEntry = {
-        id: Date.now(),
         time: newTime,
         warmBrightness: Math.min(100, Math.max(0, Number(newWarmBrightness))),
         coolBrightness: Math.min(100, Math.max(0, Number(newCoolBrightness))),
@@ -525,10 +657,20 @@ const LightScheduler = () => {
             <ModeSelector data={data} handleModeChange={handleModeChange} />
 
             {data.mode === 'dayNight' && (
-              <SunTimes sunrise={data.sunrise} sunset={data.sunset} />
+              <>
+                <SunTimes
+                  sunrise={data.sunrise}
+                  sunset={data.sunset}
+                  natural_sunset={data.natural_sunset}
+                  civil_twilight_begin={data.civil_twilight_begin}
+                  civil_twilight_end={data.civil_twilight_end}
+                  natural_twilight_end={data.natural_twilight_end}
+                />
+                <DaylightScheduleTable data={data} />
+              </>
             )}
 
-            {data.mode !== 'demo' && (
+            {data.mode === 'scheduled' && (
               <>
                 <ScheduleTable
                   data={data}
