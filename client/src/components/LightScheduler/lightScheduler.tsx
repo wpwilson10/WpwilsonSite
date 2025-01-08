@@ -309,6 +309,7 @@ const LightScheduler = () => {
   const [isSuccessfullySubmitted, setIsSuccessfullySubmitted] = useState(false);
   const [isSubmissionError, setIsSubmissionError] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [lastSavedData, setLastSavedData] = useState<ScheduleData | null>(null);
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -316,6 +317,7 @@ const LightScheduler = () => {
         const response = await axios.get<ScheduleData>(lightScheduleURL);
         if (isValidScheduleData(response.data)) {
           setData(response.data);
+          setLastSavedData(response.data); // Store initial data
         } else {
           console.error('Invalid schedule data format', response.data);
         }
@@ -354,6 +356,7 @@ const LightScheduler = () => {
   const saveSchedule = async () => {
     try {
       await axios.post(lightScheduleURL, data);
+      setLastSavedData(data); // Update last saved data
       setIsSubmissionError(false);
       setIsSuccessfullySubmitted(true);
       setUnsavedChanges(false);
@@ -361,6 +364,13 @@ const LightScheduler = () => {
       handleAxiosError(error);
       setIsSubmissionError(true);
       setIsSuccessfullySubmitted(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (lastSavedData) {
+      setData(lastSavedData);
+      setUnsavedChanges(false);
     }
   };
 
@@ -459,6 +469,14 @@ const LightScheduler = () => {
                     </p>
                   </Alert>
                 )}
+                {unsavedChanges && (
+                  <Alert variant="warning">
+                    <p className="mb-0">
+                      You have unsaved changes. Don't forget to save your
+                      changes!
+                    </p>
+                  </Alert>
+                )}
               </Col>
             </Row>
 
@@ -485,7 +503,14 @@ const LightScheduler = () => {
             )}
 
             <Row className="justify-content-md-left">
-              <Col md={12} className="mb-3 d-flex justify-content-end">
+              <Col md={12} className="mb-3 d-flex justify-content-end gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={handleCancel}
+                  disabled={!unsavedChanges}
+                >
+                  Cancel
+                </Button>
                 <Button
                   variant="success"
                   onClick={() => saveSchedule()}
