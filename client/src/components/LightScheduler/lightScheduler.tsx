@@ -137,56 +137,67 @@ const formatTime = (time: string): string => {
  * @returns {ReactElement} The ScheduleTable component.
  */
 const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
-  <Row className="justify-content-md-left">
-    <Table striped bordered hover className="mb-3">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Warm Brightness</th>
-          <th>Cool Brightness</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.schedule.map((entry: ScheduleEntry) => (
-          <tr key={entry.id}>
-            <td>{formatTime(entry.time)}</td>
-            <td>
-              <Form.Control
-                type="number"
-                value={entry.warmBrightness}
-                min="0"
-                max="100"
-                onChange={(e) =>
-                  handleInputChange(entry.id, 'warmBrightness', e.target.value)
-                }
-              />
-            </td>
-            <td>
-              <Form.Control
-                type="number"
-                value={entry.coolBrightness}
-                min="0"
-                max="100"
-                onChange={(e) =>
-                  handleInputChange(entry.id, 'coolBrightness', e.target.value)
-                }
-              />
-            </td>
-            <td>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => handleRemoveRow(entry.id)}
-              >
-                X
-              </Button>
-            </td>
+  <Container className="content-container mb-3 py-3 px-3">
+    <h5>Schedule Configuration</h5>
+    <Row>
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Warm Brightness</th>
+            <th>Cool Brightness</th>
+            <th>Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </Table>
-  </Row>
+        </thead>
+        <tbody>
+          {data.schedule.map((entry: ScheduleEntry) => (
+            <tr key={entry.id}>
+              <td>{formatTime(entry.time)}</td>
+              <td>
+                <Form.Control
+                  type="number"
+                  value={entry.warmBrightness}
+                  min="0"
+                  max="100"
+                  onChange={(e) =>
+                    handleInputChange(
+                      entry.id,
+                      'warmBrightness',
+                      e.target.value
+                    )
+                  }
+                />
+              </td>
+              <td>
+                <Form.Control
+                  type="number"
+                  value={entry.coolBrightness}
+                  min="0"
+                  max="100"
+                  onChange={(e) =>
+                    handleInputChange(
+                      entry.id,
+                      'coolBrightness',
+                      e.target.value
+                    )
+                  }
+                />
+              </td>
+              <td>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleRemoveRow(entry.id)}
+                >
+                  X
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </Row>
+  </Container>
 );
 
 /**
@@ -212,37 +223,39 @@ const AddRowForm = ({
   setNewCoolBrightness,
   handleAddRow,
 }: any) => (
-  <Row className="justify-content-md-left">
-    <Col className="mb-3">
-      <h5>Add a New Row</h5>
-      <InputGroup className="mb-3">
-        <Form.Control
-          type="time"
-          value={newTime}
-          onChange={(e) => setNewTime(e.target.value)}
-        />
-        <Form.Control
-          type="number"
-          placeholder="Warm Brightness"
-          value={newWarmBrightness}
-          min="0"
-          max="100"
-          onChange={(e) => setNewWarmBrightness(e.target.value)}
-        />
-        <Form.Control
-          type="number"
-          placeholder="Cool Brightness"
-          value={newCoolBrightness}
-          min="0"
-          max="100"
-          onChange={(e) => setNewCoolBrightness(e.target.value)}
-        />
-        <Button variant="primary" onClick={handleAddRow}>
-          Add
-        </Button>
-      </InputGroup>
-    </Col>
-  </Row>
+  <Container className="content-container mb-3 py-3 px-3">
+    <h5>Add Schedule Entry</h5>
+    <Row>
+      <Col>
+        <InputGroup className="mb-3">
+          <Form.Control
+            type="time"
+            value={newTime}
+            onChange={(e) => setNewTime(e.target.value)}
+          />
+          <Form.Control
+            type="number"
+            placeholder="Warm Brightness"
+            value={newWarmBrightness}
+            min="0"
+            max="100"
+            onChange={(e) => setNewWarmBrightness(e.target.value)}
+          />
+          <Form.Control
+            type="number"
+            placeholder="Cool Brightness"
+            value={newCoolBrightness}
+            min="0"
+            max="100"
+            onChange={(e) => setNewCoolBrightness(e.target.value)}
+          />
+          <Button variant="primary" onClick={handleAddRow}>
+            Add
+          </Button>
+        </InputGroup>
+      </Col>
+    </Row>
+  </Container>
 );
 
 /**
@@ -255,32 +268,64 @@ const AddRowForm = ({
  * @returns {ReactElement} The ModeSelector component.
  */
 const ModeSelector = ({ data, handleModeChange }: any) => (
-  <Row className="justify-content-start">
-    <Col xs="auto" md="auto" className="mb-3">
-      <Button
-        variant={data.mode === 'dayNight' ? 'primary' : 'outline-primary'}
-        onClick={() => handleModeChange('dayNight')}
-      >
-        Day/Night Cycle
-      </Button>
-    </Col>
-    <Col xs="auto" md="auto" className="mb-3">
-      <Button
-        variant={data.mode === 'scheduled' ? 'primary' : 'outline-primary'}
-        onClick={() => handleModeChange('scheduled')}
-      >
-        Scheduled
-      </Button>
-    </Col>
-    <Col xs="auto" md="auto" className="mb-3">
-      <Button
-        variant={data.mode === 'demo' ? 'primary' : 'outline-primary'}
-        onClick={() => handleModeChange('demo')}
-      >
-        Demo
-      </Button>
-    </Col>
-  </Row>
+  <Container className="content-container mb-3 py-3 px-3">
+    <h5>Select Mode</h5>
+    <Row className="justify-content-start">
+      <Col xs="auto" md="auto" className="mb-3">
+        <Button
+          variant={data.mode === 'dayNight' ? 'primary' : 'outline-primary'}
+          onClick={() => handleModeChange('dayNight')}
+        >
+          Day/Night Cycle
+        </Button>
+      </Col>
+      <Col xs="auto" md="auto" className="mb-3">
+        <Button
+          variant={data.mode === 'scheduled' ? 'primary' : 'outline-primary'}
+          onClick={() => handleModeChange('scheduled')}
+        >
+          Scheduled
+        </Button>
+      </Col>
+      <Col xs="auto" md="auto" className="mb-3">
+        <Button
+          variant={data.mode === 'demo' ? 'primary' : 'outline-primary'}
+          onClick={() => handleModeChange('demo')}
+        >
+          Demo
+        </Button>
+      </Col>
+    </Row>
+  </Container>
+);
+
+/**
+ * The SunTimes component that displays the sunrise and sunset times.
+ *
+ * @component
+ * @param {Object} props - The props passed to the component.
+ * @param {string} props.sunrise - The sunrise time.
+ * @param {string} props.sunset - The sunset time.
+ * @returns {ReactElement} The SunTimes component.
+ */
+const SunTimes = ({ sunrise, sunset }: { sunrise: string; sunset: string }) => (
+  <Container className="content-container mb-3 py-3 px-3">
+    <h5>Day/Night Schedule</h5>
+    <Row>
+      <Col xs={12} md={6} className="mb-2 mb-md-0">
+        <div>
+          <div className="text-muted small">Sunrise</div>
+          <div className="fs-5">{formatTime(sunrise)}</div>
+        </div>
+      </Col>
+      <Col xs={12} md={6}>
+        <div>
+          <div className="text-muted small">Sunset</div>
+          <div className="fs-5">{formatTime(sunset)}</div>
+        </div>
+      </Col>
+    </Row>
+  </Container>
 );
 
 /**
@@ -446,10 +491,7 @@ const LightScheduler = () => {
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <Container
-        id="light_scheduler"
-        className="content-container mb-3 py-3 px-3"
-      >
+      <Container id="light_scheduler" className="mb-3">
         {isLoading ? (
           <LoadingSpinner /> // Display spinner while loading
         ) : (
@@ -480,8 +522,11 @@ const LightScheduler = () => {
               </Col>
             </Row>
 
-            <h5>Select Mode</h5>
             <ModeSelector data={data} handleModeChange={handleModeChange} />
+
+            {data.mode === 'dayNight' && (
+              <SunTimes sunrise={data.sunrise} sunset={data.sunset} />
+            )}
 
             {data.mode !== 'demo' && (
               <>
