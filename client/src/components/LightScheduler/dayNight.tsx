@@ -1,19 +1,33 @@
-import { Col, Container, Row, Table } from 'react-bootstrap';
+import { Col, Container, Row, Table, Form } from 'react-bootstrap';
 import { ScheduleData, ScheduleEntry } from './models';
 import { formatTime } from './utils';
+
+interface DaylightScheduleTableProps {
+  data: ScheduleData;
+  handleInputChange: (
+    unix_time: number,
+    type: 'warmBrightness' | 'coolBrightness',
+    value: string
+  ) => void;
+  handleTimeChange?: (key: 'bed_time' | 'night_time', newTime: string) => void;
+}
 
 /**
  * The DaylightScheduleTable component that displays the named schedule entries in a table.
  */
-export const DaylightScheduleTable = ({ data }: { data: ScheduleData }) => {
+export const DaylightScheduleTable = ({
+  data,
+  handleInputChange,
+  handleTimeChange,
+}: DaylightScheduleTableProps) => {
   // Define the entries to show and their labels
   const scheduleEntries = [
-    { key: 'civil_twilight_begin', label: 'Dawn' },
-    { key: 'sunrise', label: 'Sunrise' },
-    { key: 'sunset', label: 'Sunset' },
-    { key: 'civil_twilight_end', label: 'Dusk' },
-    { key: 'bed_time', label: 'Bed Time' },
-    { key: 'night_time', label: 'Night Time' },
+    { key: 'civil_twilight_begin', label: 'Dawn', editable: false },
+    { key: 'sunrise', label: 'Sunrise', editable: false },
+    { key: 'sunset', label: 'Sunset', editable: false },
+    { key: 'civil_twilight_end', label: 'Dusk', editable: false },
+    { key: 'bed_time', label: 'Bed Time', editable: true },
+    { key: 'night_time', label: 'Night Time', editable: true },
   ] as const;
 
   return (
@@ -30,12 +44,50 @@ export const DaylightScheduleTable = ({ data }: { data: ScheduleData }) => {
             </tr>
           </thead>
           <tbody>
-            {scheduleEntries.map(({ key, label }) => (
+            {scheduleEntries.map(({ key, label, editable }) => (
               <tr key={key}>
                 <td>{label}</td>
-                <td>{formatTime(data[key].time)}</td>
-                <td>{data[key].warmBrightness}%</td>
-                <td>{data[key].coolBrightness}%</td>
+                <td>
+                  {editable && handleTimeChange ? (
+                    <Form.Control
+                      type="time"
+                      value={data[key].time}
+                      onChange={(e) => handleTimeChange(key, e.target.value)}
+                    />
+                  ) : (
+                    formatTime(data[key].time)
+                  )}
+                </td>
+                <td>
+                  <Form.Control
+                    type="number"
+                    value={data[key].warmBrightness}
+                    min="0"
+                    max="100"
+                    onChange={(e) =>
+                      handleInputChange(
+                        data[key].unix_time,
+                        'warmBrightness',
+                        e.target.value
+                      )
+                    }
+                  />
+                </td>
+                <td>
+                  <Form.Control
+                    type="number"
+                    value={data[key].coolBrightness}
+                    min="0"
+                    max="100"
+                    onChange={(e) =>
+                      handleInputChange(
+                        data[key].unix_time,
+                        'coolBrightness',
+                        e.target.value
+                      )
+                    }
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -45,19 +97,6 @@ export const DaylightScheduleTable = ({ data }: { data: ScheduleData }) => {
   );
 };
 
-/**
- * The SunTimes component that displays the sunrise and sunset times.
- *
- * @component
- * @param {Object} props - The props passed to the component.
- * @param {ScheduleEntry} props.sunrise - The sunrise time.
- * @param {ScheduleEntry} props.sunset - The sunset time.
- * @param {ScheduleEntry} props.natural_sunset - The natural sunset time.
- * @param {ScheduleEntry} props.civil_twilight_begin - The civil twilight begin time.
- * @param {ScheduleEntry} props.civil_twilight_end - The civil twilight end time.
- * @param {ScheduleEntry} props.natural_twilight_end - The natural twilight end time.
- * @returns {ReactElement} The SunTimes component.
- */
 export const SunTimes = ({
   sunrise,
   sunset,
@@ -118,7 +157,11 @@ export const SunTimes = ({
   </Container>
 );
 
-export const DayNightComponent = ({ data }: { data: ScheduleData }) => (
+export const DayNightComponent = ({
+  data,
+  handleInputChange,
+  handleTimeChange,
+}: DaylightScheduleTableProps) => (
   <>
     <SunTimes
       sunrise={data.sunrise}
@@ -128,7 +171,11 @@ export const DayNightComponent = ({ data }: { data: ScheduleData }) => (
       civil_twilight_end={data.civil_twilight_end}
       natural_twilight_end={data.natural_twilight_end}
     />
-    <DaylightScheduleTable data={data} />
+    <DaylightScheduleTable
+      data={data}
+      handleInputChange={handleInputChange}
+      handleTimeChange={handleTimeChange}
+    />
   </>
 );
 

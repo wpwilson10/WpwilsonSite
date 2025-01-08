@@ -338,26 +338,50 @@ const LightScheduler = () => {
   };
 
   /**
-   * Handles input changes for schedule entries.
-   *
-   * @param {number} unix_time - The Unix timestamp of the schedule entry.
-   * @param {'warmBrightness' | 'coolBrightness'} type - The type of brightness to update.
-   * @param {string} value - The new value.
+   * Handles input changes for schedule entries and named entries.
    */
   const handleInputChange = (
     unix_time: number,
     type: 'warmBrightness' | 'coolBrightness',
     value: string
   ) => {
-    const updatedSchedule = data.schedule.map((entry) =>
-      entry.unix_time === unix_time
-        ? {
-            ...entry,
-            [type]: Math.min(100, Math.max(0, Number(value))),
-          }
-        : entry
+    // Find if this is a named entry
+    const namedEntries = [
+      'sunrise',
+      'sunset',
+      'natural_sunset',
+      'civil_twilight_begin',
+      'civil_twilight_end',
+      'natural_twilight_end',
+      'bed_time',
+      'night_time',
+    ] as const;
+
+    const matchingEntry = namedEntries.find(
+      (key) => data[key].unix_time === unix_time
     );
-    setData({ ...data, schedule: updatedSchedule });
+
+    if (matchingEntry) {
+      // Update named entry
+      setData({
+        ...data,
+        [matchingEntry]: {
+          ...data[matchingEntry],
+          [type]: Math.min(100, Math.max(0, Number(value))),
+        },
+      });
+    } else {
+      // Update schedule entry
+      const updatedSchedule = data.schedule.map((entry) =>
+        entry.unix_time === unix_time
+          ? {
+              ...entry,
+              [type]: Math.min(100, Math.max(0, Number(value))),
+            }
+          : entry
+      );
+      setData({ ...data, schedule: updatedSchedule });
+    }
     setUnsavedChanges(true);
   };
 
@@ -408,6 +432,27 @@ const LightScheduler = () => {
     setUnsavedChanges(true);
   };
 
+  /**
+   * Handles time changes for bed_time and night_time entries.
+   */
+  const handleTimeChange = (
+    key: 'bed_time' | 'night_time',
+    newTime: string
+  ) => {
+    const unix_time = Math.floor(
+      new Date(`1970-01-01T${newTime}`).getTime() / 1000
+    );
+    setData({
+      ...data,
+      [key]: {
+        ...data[key],
+        time: newTime,
+        unix_time: unix_time,
+      },
+    });
+    setUnsavedChanges(true);
+  };
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Container id="light_scheduler" className="mb-3">
@@ -443,7 +488,13 @@ const LightScheduler = () => {
 
             <ModeSelector data={data} handleModeChange={handleModeChange} />
 
-            {data.mode === 'dayNight' && <DayNightComponent data={data} />}
+            {data.mode === 'dayNight' && (
+              <DayNightComponent
+                data={data}
+                handleInputChange={handleInputChange}
+                handleTimeChange={handleTimeChange}
+              />
+            )}
 
             {data.mode === 'scheduled' && (
               <>
