@@ -36,95 +36,13 @@ import {
 import axios from 'axios';
 import { handleAxiosError } from '../../utils/error';
 import LoadingSpinner from '../LoadingSpinner/spinner';
+import DayNightComponent from './dayNight';
+import { ScheduleData, ScheduleEntry } from './models';
+import { formatTime, isValidScheduleData } from './utils';
 
 // The server URL for the contact form API.
 const lightScheduleURL: string =
   process.env.API_DOMAIN_NAME! + process.env.LIGHT_SCHEDULE_API!;
-
-/**
- * Represents a single entry in the light schedule.
- *
- * @interface ScheduleEntry
- * @property {number} id - The unique identifier for the schedule entry.
- * @property {string} time - The time of day for this schedule entry in 24-hour format (HH:MM).
- * @property {number} warmBrightness - The brightness level for warm light (0-100).
- * @property {number} coolBrightness - The brightness level for cool light (0-100).
- * @property {number} unix_time - The Unix timestamp for this schedule entry.
- */
-interface ScheduleEntry {
-  id: number;
-  time: string;
-  warmBrightness: number;
-  coolBrightness: number;
-  unix_time: number;
-}
-
-/**
- * Represents the complete light schedule data structure.
- *
- * @interface ScheduleData
- * @property {'dayNight' | 'scheduled' | 'demo'} mode - The current operating mode for the lights.
- *    - 'dayNight': Automatically adjusts based on time of day
- *    - 'scheduled': Follows the user-defined schedule
- *    - 'demo': Runs a demonstration cycle
- * @property {ScheduleEntry[]} schedule - Array of schedule entries that define the light settings throughout the day.
- * @property {string} sunrise - The time of sunrise in 24-hour format (HH:MM).
- * @property {string} sunset - The time of sunset in 24-hour format (HH:MM).
- * @property {number} sunrise_unix - The Unix timestamp for sunrise.
- * @property {number} sunset_unix - The Unix timestamp for sunset.
- */
-interface ScheduleData {
-  mode: 'dayNight' | 'scheduled' | 'demo';
-  schedule: ScheduleEntry[];
-  sunrise: string;
-  sunset: string;
-  sunrise_unix: number;
-  sunset_unix: number;
-}
-
-/**
- * Validates the schedule data received from the server.
- *
- * @param {any} data - The data to validate.
- * @returns {boolean} - True if the data is valid, false otherwise.
- */
-const isValidScheduleData = (data: any): data is ScheduleData => {
-  // Validate the mode
-  const isValidMode = ['dayNight', 'scheduled', 'demo'].includes(data?.mode);
-  // Validate the schedule array
-  const isValidSchedule =
-    Array.isArray(data?.schedule) &&
-    data.schedule.every(
-      (entry: any) =>
-        typeof entry.id === 'number' &&
-        typeof entry.time === 'string' &&
-        typeof entry.warmBrightness === 'number' &&
-        entry.warmBrightness >= 0 &&
-        entry.warmBrightness <= 100 &&
-        typeof entry.coolBrightness === 'number' &&
-        entry.coolBrightness >= 0 &&
-        entry.coolBrightness <= 100 &&
-        typeof entry.unix_time === 'number'
-    );
-
-  const isValidSunData =
-    typeof data?.sunrise === 'string' &&
-    typeof data?.sunset === 'string' &&
-    typeof data?.sunrise_unix === 'number' &&
-    typeof data?.sunset_unix === 'number';
-
-  return isValidMode && isValidSchedule && isValidSunData;
-};
-
-/**
- * Formats a 24-hour time string (HH:mm) to 12-hour format (h:mm tt)
- */
-const formatTime = (time: string): string => {
-  const [hours, minutes] = time.split(':').map(Number);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const hour12 = hours % 12 || 12;
-  return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
-};
 
 /**
  * The ScheduleTable component that displays the schedule entries in a table.
@@ -137,56 +55,67 @@ const formatTime = (time: string): string => {
  * @returns {ReactElement} The ScheduleTable component.
  */
 const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
-  <Row className="justify-content-md-left">
-    <Table striped bordered hover className="mb-3">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Warm Brightness</th>
-          <th>Cool Brightness</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.schedule.map((entry: ScheduleEntry) => (
-          <tr key={entry.id}>
-            <td>{formatTime(entry.time)}</td>
-            <td>
-              <Form.Control
-                type="number"
-                value={entry.warmBrightness}
-                min="0"
-                max="100"
-                onChange={(e) =>
-                  handleInputChange(entry.id, 'warmBrightness', e.target.value)
-                }
-              />
-            </td>
-            <td>
-              <Form.Control
-                type="number"
-                value={entry.coolBrightness}
-                min="0"
-                max="100"
-                onChange={(e) =>
-                  handleInputChange(entry.id, 'coolBrightness', e.target.value)
-                }
-              />
-            </td>
-            <td>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => handleRemoveRow(entry.id)}
-              >
-                X
-              </Button>
-            </td>
+  <Container className="content-container mb-3 py-3 px-3">
+    <h5>Schedule Configuration</h5>
+    <Row>
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Warm Brightness</th>
+            <th>Cool Brightness</th>
+            <th>Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </Table>
-  </Row>
+        </thead>
+        <tbody>
+          {data.schedule.map((entry: ScheduleEntry) => (
+            <tr key={entry.unix_time}>
+              <td>{formatTime(entry.time)}</td>
+              <td>
+                <Form.Control
+                  type="number"
+                  value={entry.warmBrightness}
+                  min="0"
+                  max="100"
+                  onChange={(e) =>
+                    handleInputChange(
+                      entry.unix_time,
+                      'warmBrightness',
+                      e.target.value
+                    )
+                  }
+                />
+              </td>
+              <td>
+                <Form.Control
+                  type="number"
+                  value={entry.coolBrightness}
+                  min="0"
+                  max="100"
+                  onChange={(e) =>
+                    handleInputChange(
+                      entry.unix_time,
+                      'coolBrightness',
+                      e.target.value
+                    )
+                  }
+                />
+              </td>
+              <td>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleRemoveRow(entry.unix_time)}
+                >
+                  X
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </Row>
+  </Container>
 );
 
 /**
@@ -212,37 +141,39 @@ const AddRowForm = ({
   setNewCoolBrightness,
   handleAddRow,
 }: any) => (
-  <Row className="justify-content-md-left">
-    <Col className="mb-3">
-      <h5>Add a New Row</h5>
-      <InputGroup className="mb-3">
-        <Form.Control
-          type="time"
-          value={newTime}
-          onChange={(e) => setNewTime(e.target.value)}
-        />
-        <Form.Control
-          type="number"
-          placeholder="Warm Brightness"
-          value={newWarmBrightness}
-          min="0"
-          max="100"
-          onChange={(e) => setNewWarmBrightness(e.target.value)}
-        />
-        <Form.Control
-          type="number"
-          placeholder="Cool Brightness"
-          value={newCoolBrightness}
-          min="0"
-          max="100"
-          onChange={(e) => setNewCoolBrightness(e.target.value)}
-        />
-        <Button variant="primary" onClick={handleAddRow}>
-          Add
-        </Button>
-      </InputGroup>
-    </Col>
-  </Row>
+  <Container className="content-container mb-3 py-3 px-3">
+    <h5>Add Schedule Entry</h5>
+    <Row>
+      <Col>
+        <InputGroup className="mb-3">
+          <Form.Control
+            type="time"
+            value={newTime}
+            onChange={(e) => setNewTime(e.target.value)}
+          />
+          <Form.Control
+            type="number"
+            placeholder="Warm Brightness"
+            value={newWarmBrightness}
+            min="0"
+            max="100"
+            onChange={(e) => setNewWarmBrightness(e.target.value)}
+          />
+          <Form.Control
+            type="number"
+            placeholder="Cool Brightness"
+            value={newCoolBrightness}
+            min="0"
+            max="100"
+            onChange={(e) => setNewCoolBrightness(e.target.value)}
+          />
+          <Button variant="primary" onClick={handleAddRow}>
+            Add
+          </Button>
+        </InputGroup>
+      </Col>
+    </Row>
+  </Container>
 );
 
 /**
@@ -255,32 +186,35 @@ const AddRowForm = ({
  * @returns {ReactElement} The ModeSelector component.
  */
 const ModeSelector = ({ data, handleModeChange }: any) => (
-  <Row className="justify-content-start">
-    <Col xs="auto" md="auto" className="mb-3">
-      <Button
-        variant={data.mode === 'dayNight' ? 'primary' : 'outline-primary'}
-        onClick={() => handleModeChange('dayNight')}
-      >
-        Day/Night Cycle
-      </Button>
-    </Col>
-    <Col xs="auto" md="auto" className="mb-3">
-      <Button
-        variant={data.mode === 'scheduled' ? 'primary' : 'outline-primary'}
-        onClick={() => handleModeChange('scheduled')}
-      >
-        Scheduled
-      </Button>
-    </Col>
-    <Col xs="auto" md="auto" className="mb-3">
-      <Button
-        variant={data.mode === 'demo' ? 'primary' : 'outline-primary'}
-        onClick={() => handleModeChange('demo')}
-      >
-        Demo
-      </Button>
-    </Col>
-  </Row>
+  <Container className="content-container mb-3 py-3 px-3">
+    <h5>Select Mode</h5>
+    <Row className="justify-content-start">
+      <Col xs="auto" md="auto" className="mb-3">
+        <Button
+          variant={data.mode === 'dayNight' ? 'primary' : 'outline-primary'}
+          onClick={() => handleModeChange('dayNight')}
+        >
+          Day/Night Cycle
+        </Button>
+      </Col>
+      <Col xs="auto" md="auto" className="mb-3">
+        <Button
+          variant={data.mode === 'scheduled' ? 'primary' : 'outline-primary'}
+          onClick={() => handleModeChange('scheduled')}
+        >
+          Scheduled
+        </Button>
+      </Col>
+      <Col xs="auto" md="auto" className="mb-3">
+        <Button
+          variant={data.mode === 'demo' ? 'primary' : 'outline-primary'}
+          onClick={() => handleModeChange('demo')}
+        >
+          Demo
+        </Button>
+      </Col>
+    </Row>
+  </Container>
 );
 
 /**
@@ -297,10 +231,39 @@ const LightScheduler = () => {
   const [data, setData] = useState<ScheduleData>({
     mode: 'scheduled',
     schedule: [],
-    sunrise: '',
-    sunset: '',
-    sunrise_unix: 0,
-    sunset_unix: 0,
+    sunrise: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+    sunset: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+    natural_sunset: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
+    civil_twilight_begin: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
+    civil_twilight_end: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
+    natural_twilight_end: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
+    bed_time: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+    night_time: {
+      time: '',
+      unix_time: 0,
+      warmBrightness: 0,
+      coolBrightness: 0,
+    },
   });
   const [newTime, setNewTime] = useState('');
   const [newWarmBrightness, setNewWarmBrightness] = useState('');
@@ -375,36 +338,62 @@ const LightScheduler = () => {
   };
 
   /**
-   * Handles input changes for schedule entries.
-   *
-   * @param {number} id - The ID of the schedule entry.
-   * @param {'warmBrightness' | 'coolBrightness'} type - The type of brightness to update.
-   * @param {string} value - The new value.
+   * Handles input changes for schedule entries and named entries.
    */
   const handleInputChange = (
-    id: number,
+    unix_time: number,
     type: 'warmBrightness' | 'coolBrightness',
     value: string
   ) => {
-    const updatedSchedule = data.schedule.map((entry) =>
-      entry.id === id
-        ? {
-            ...entry,
-            [type]: Math.min(100, Math.max(0, Number(value))),
-          }
-        : entry
+    // Find if this is a named entry
+    const namedEntries = [
+      'sunrise',
+      'sunset',
+      'natural_sunset',
+      'civil_twilight_begin',
+      'civil_twilight_end',
+      'natural_twilight_end',
+      'bed_time',
+      'night_time',
+    ] as const;
+
+    const matchingEntry = namedEntries.find(
+      (key) => data[key].unix_time === unix_time
     );
-    setData({ ...data, schedule: updatedSchedule });
+
+    if (matchingEntry) {
+      // Update named entry
+      setData({
+        ...data,
+        [matchingEntry]: {
+          ...data[matchingEntry],
+          [type]: Math.min(100, Math.max(0, Number(value))),
+        },
+      });
+    } else {
+      // Update schedule entry
+      const updatedSchedule = data.schedule.map((entry) =>
+        entry.unix_time === unix_time
+          ? {
+              ...entry,
+              [type]: Math.min(100, Math.max(0, Number(value))),
+            }
+          : entry
+      );
+      setData({ ...data, schedule: updatedSchedule });
+    }
     setUnsavedChanges(true);
   };
 
   /**
    * Handles removing a schedule entry.
    *
-   * @param {number} id - The ID of the schedule entry to remove.
+   * @param {number} unix_time - The Unix timestamp of the schedule entry to remove.
    */
-  const handleRemoveRow = (id: number) => {
-    const updatedSchedule = data.schedule.filter((entry) => entry.id !== id);
+  const handleRemoveRow = (unix_time: number) => {
+    const updatedSchedule = data.schedule.filter(
+      (entry) => entry.unix_time !== unix_time
+    );
     setData({ ...data, schedule: updatedSchedule });
     setUnsavedChanges(true);
   };
@@ -415,7 +404,6 @@ const LightScheduler = () => {
   const handleAddRow = () => {
     if (newTime && newWarmBrightness !== '' && newCoolBrightness !== '') {
       const newRow: ScheduleEntry = {
-        id: Date.now(),
         time: newTime,
         warmBrightness: Math.min(100, Math.max(0, Number(newWarmBrightness))),
         coolBrightness: Math.min(100, Math.max(0, Number(newCoolBrightness))),
@@ -444,12 +432,30 @@ const LightScheduler = () => {
     setUnsavedChanges(true);
   };
 
+  /**
+   * Handles time changes for bed_time and night_time entries.
+   */
+  const handleTimeChange = (
+    key: 'bed_time' | 'night_time',
+    newTime: string
+  ) => {
+    const unix_time = Math.floor(
+      new Date(`1970-01-01T${newTime}`).getTime() / 1000
+    );
+    setData({
+      ...data,
+      [key]: {
+        ...data[key],
+        time: newTime,
+        unix_time: unix_time,
+      },
+    });
+    setUnsavedChanges(true);
+  };
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <Container
-        id="light_scheduler"
-        className="content-container mb-3 py-3 px-3"
-      >
+      <Container id="light_scheduler" className="mb-3">
         {isLoading ? (
           <LoadingSpinner /> // Display spinner while loading
         ) : (
@@ -480,10 +486,17 @@ const LightScheduler = () => {
               </Col>
             </Row>
 
-            <h5>Select Mode</h5>
             <ModeSelector data={data} handleModeChange={handleModeChange} />
 
-            {data.mode !== 'demo' && (
+            {data.mode === 'dayNight' && (
+              <DayNightComponent
+                data={data}
+                handleInputChange={handleInputChange}
+                handleTimeChange={handleTimeChange}
+              />
+            )}
+
+            {data.mode === 'scheduled' && (
               <>
                 <ScheduleTable
                   data={data}
