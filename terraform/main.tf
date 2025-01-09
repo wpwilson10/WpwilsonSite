@@ -206,7 +206,7 @@ module "api_gateway" {
   create_certificate = false
 
   cors_configuration = {
-    allow_headers = ["content-type"]
+    allow_headers = ["content-type", "x-custom-auth"]
     allow_methods = ["GET", "OPTIONS", "POST"]
     allow_origins = [local.site_URL, "http://${module.client_files_s3_bucket.s3_bucket_website_endpoint}"]
   }

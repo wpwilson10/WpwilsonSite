@@ -37,12 +37,15 @@ import axios from 'axios';
 import { handleAxiosError } from '../../utils/error';
 import LoadingSpinner from '../LoadingSpinner/spinner';
 import DayNightComponent from './dayNight';
-import { ScheduleData, ScheduleEntry } from './models';
+import { defaultScheduleData, ScheduleData, ScheduleEntry } from './models';
 import { formatTime, isValidScheduleData } from './utils';
 
-// The server URL for the contact form API.
+// The server URL for the light schedule API.
 const lightScheduleURL: string =
   process.env.API_DOMAIN_NAME! + process.env.LIGHT_SCHEDULE_API!;
+
+// The AWS secret token for the light schedule API.
+const awsSecretToken: string = process.env.AWS_SECRET_TOKEN!;
 
 /**
  * The ScheduleTable component that displays the schedule entries in a table.
@@ -228,43 +231,7 @@ const ModeSelector = ({ data, handleModeChange }: any) => (
  * @returns {ReactElement} The LightScheduler component.
  */
 const LightScheduler = () => {
-  const [data, setData] = useState<ScheduleData>({
-    mode: 'scheduled',
-    schedule: [],
-    sunrise: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
-    sunset: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
-    natural_sunset: {
-      time: '',
-      unix_time: 0,
-      warmBrightness: 0,
-      coolBrightness: 0,
-    },
-    civil_twilight_begin: {
-      time: '',
-      unix_time: 0,
-      warmBrightness: 0,
-      coolBrightness: 0,
-    },
-    civil_twilight_end: {
-      time: '',
-      unix_time: 0,
-      warmBrightness: 0,
-      coolBrightness: 0,
-    },
-    natural_twilight_end: {
-      time: '',
-      unix_time: 0,
-      warmBrightness: 0,
-      coolBrightness: 0,
-    },
-    bed_time: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
-    night_time: {
-      time: '',
-      unix_time: 0,
-      warmBrightness: 0,
-      coolBrightness: 0,
-    },
-  });
+  const [data, setData] = useState<ScheduleData>(defaultScheduleData);
   const [newTime, setNewTime] = useState('');
   const [newWarmBrightness, setNewWarmBrightness] = useState('');
   const [newCoolBrightness, setNewCoolBrightness] = useState('');
@@ -318,7 +285,12 @@ const LightScheduler = () => {
    */
   const saveSchedule = async () => {
     try {
-      await axios.post(lightScheduleURL, data);
+      await axios.post(lightScheduleURL, data, {
+        headers: {
+          'content-type': 'application/json',
+          'x-custom-auth': awsSecretToken,
+        },
+      });
       setLastSavedData(data); // Update last saved data
       setIsSubmissionError(false);
       setIsSuccessfullySubmitted(true);
