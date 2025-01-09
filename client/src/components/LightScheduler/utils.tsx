@@ -21,9 +21,7 @@ export const isValidScheduleData = (data: any): data is ScheduleData => {
 
   const isValidSchedule =
     Array.isArray(data?.schedule) &&
-    data.schedule.every((entry: any) =>
-      isValidEntry({ ...entry, id: entry.id })
-    );
+    data.schedule.every((entry: any) => isValidEntry(entry));
 
   const requiredEntries = [
     'sunrise',
@@ -40,7 +38,13 @@ export const isValidScheduleData = (data: any): data is ScheduleData => {
     (key) => data?.[key] && isValidEntry(data[key])
   );
 
-  return isValidMode && isValidSchedule && hasValidEntries;
+  const hasValidUpdateTime =
+    typeof data?.update_time === 'string' &&
+    typeof data?.update_time_unix === 'number';
+
+  return (
+    isValidMode && isValidSchedule && hasValidEntries && hasValidUpdateTime
+  );
 };
 
 /**

@@ -31,6 +31,8 @@ export interface ScheduleEntry {
  * @property {ScheduleEntry} natural_twilight_end - The natural twilight end schedule entry.
  * @property {ScheduleEntry} bed_time - The bed time schedule entry.
  * @property {ScheduleEntry} night_time - The night time schedule entry.
+ * @property {string} update_time - The time when the schedule was last updated in 24-hour format (HH:MM).
+ * @property {number} update_time_unix - The Unix timestamp when the schedule was last updated.
  */
 export interface ScheduleData {
   mode: 'dayNight' | 'scheduled' | 'demo';
@@ -43,4 +45,46 @@ export interface ScheduleData {
   natural_twilight_end: ScheduleEntry;
   bed_time: ScheduleEntry;
   night_time: ScheduleEntry;
+  update_time: string;
+  update_time_unix: number;
 }
+
+export const defaultScheduleData: ScheduleData = {
+  mode: 'scheduled',
+  schedule: [],
+  sunrise: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+  sunset: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+  natural_sunset: {
+    time: '',
+    unix_time: 0,
+    warmBrightness: 0,
+    coolBrightness: 0,
+  },
+  civil_twilight_begin: {
+    time: '',
+    unix_time: 0,
+    warmBrightness: 0,
+    coolBrightness: 0,
+  },
+  civil_twilight_end: {
+    time: '',
+    unix_time: 0,
+    warmBrightness: 0,
+    coolBrightness: 0,
+  },
+  natural_twilight_end: {
+    time: '',
+    unix_time: 0,
+    warmBrightness: 0,
+    coolBrightness: 0,
+  },
+  bed_time: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
+  night_time: {
+    time: '',
+    unix_time: 0,
+    warmBrightness: 0,
+    coolBrightness: 0,
+  },
+  update_time: '03:00',
+  update_time_unix: Math.floor(new Date(`1970-01-01T03:00`).getTime() / 1000),
+};
