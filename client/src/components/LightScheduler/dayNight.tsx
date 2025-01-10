@@ -33,66 +33,128 @@ export const DaylightScheduleTable = ({
   return (
     <Container className="content-container mb-3 py-3 px-3">
       <h5>Daylight Schedule</h5>
-      <Row>
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Event</th>
-              <th>Time</th>
-              <th>Warm Brightness</th>
-              <th>Cool Brightness</th>
-            </tr>
-          </thead>
-          <tbody>
-            {scheduleEntries.map(({ key, label, editable }) => (
-              <tr key={key}>
-                <td>{label}</td>
-                <td>
-                  {editable && handleTimeChange ? (
-                    <Form.Control
-                      type="time"
-                      value={data[key].time}
-                      onChange={(e) => handleTimeChange(key, e.target.value)}
-                    />
-                  ) : (
-                    formatTime(data[key].time)
-                  )}
-                </td>
-                <td>
+      <div className="d-none d-md-block">
+        {' '}
+        {/* Desktop view */}
+        <Row>
+          <div className="table-responsive">
+            <Table striped bordered hover size="sm">
+              <thead>
+                <tr>
+                  <th style={{ width: '20%' }}>Event</th>
+                  <th style={{ width: '20%' }}>Time</th>
+                  <th style={{ width: '30%' }}>Warm</th>
+                  <th style={{ width: '30%' }}>Cool</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scheduleEntries.map(({ key, label, editable }) => (
+                  <tr key={key}>
+                    <td>{label}</td>
+                    <td>
+                      {editable && handleTimeChange ? (
+                        <Form.Control
+                          type="time"
+                          value={data[key].time}
+                          onChange={(e) =>
+                            handleTimeChange(key, e.target.value)
+                          }
+                        />
+                      ) : (
+                        formatTime(data[key].time)
+                      )}
+                    </td>
+                    <td>
+                      <Form.Control
+                        type="number"
+                        value={data[key].warmBrightness}
+                        min="0"
+                        max="100"
+                        onChange={(e) =>
+                          handleInputChange(
+                            data[key].unix_time,
+                            'warmBrightness',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+                    <td>
+                      <Form.Control
+                        type="number"
+                        value={data[key].coolBrightness}
+                        min="0"
+                        max="100"
+                        onChange={(e) =>
+                          handleInputChange(
+                            data[key].unix_time,
+                            'coolBrightness',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </Row>
+      </div>
+      <div className="d-md-none">
+        {' '}
+        {/* Mobile view */}
+        {scheduleEntries.map(({ key, label, editable }) => (
+          <div key={key} className="border-bottom pb-3 mb-3">
+            <div className="mb-2">
+              <strong>{label}</strong>
+              <div>
+                {editable && handleTimeChange ? (
                   <Form.Control
-                    type="number"
-                    value={data[key].warmBrightness}
-                    min="0"
-                    max="100"
-                    onChange={(e) =>
-                      handleInputChange(
-                        data[key].unix_time,
-                        'warmBrightness',
-                        e.target.value
-                      )
-                    }
+                    type="time"
+                    value={data[key].time}
+                    onChange={(e) => handleTimeChange(key, e.target.value)}
                   />
-                </td>
-                <td>
-                  <Form.Control
-                    type="number"
-                    value={data[key].coolBrightness}
-                    min="0"
-                    max="100"
-                    onChange={(e) =>
-                      handleInputChange(
-                        data[key].unix_time,
-                        'coolBrightness',
-                        e.target.value
-                      )
-                    }
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </Row>
+                ) : (
+                  formatTime(data[key].time)
+                )}
+              </div>
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Warm Brightness</label>
+              <Form.Control
+                type="number"
+                value={data[key].warmBrightness}
+                min="0"
+                max="100"
+                onChange={(e) =>
+                  handleInputChange(
+                    data[key].unix_time,
+                    'warmBrightness',
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+            <div>
+              <label className="form-label">Cool Brightness</label>
+              <Form.Control
+                type="number"
+                value={data[key].coolBrightness}
+                min="0"
+                max="100"
+                onChange={(e) =>
+                  handleInputChange(
+                    data[key].unix_time,
+                    'coolBrightness',
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+          </div>
+        ))}
+      </div>
     </Container>
   );
 };

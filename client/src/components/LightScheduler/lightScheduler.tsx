@@ -60,64 +60,122 @@ const awsSecretToken: string = process.env.AWS_LIGHTS_SECRET_TOKEN!;
 const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
   <Container className="content-container mb-3 py-3 px-3">
     <h5>Schedule Configuration</h5>
-    <Row>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Warm Brightness</th>
-            <th>Cool Brightness</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.schedule.map((entry: ScheduleEntry) => (
-            <tr key={entry.unix_time}>
-              <td>{formatTime(entry.time)}</td>
-              <td>
-                <Form.Control
-                  type="number"
-                  value={entry.warmBrightness}
-                  min="0"
-                  max="100"
-                  onChange={(e) =>
-                    handleInputChange(
-                      entry.unix_time,
-                      'warmBrightness',
-                      e.target.value
-                    )
-                  }
-                />
-              </td>
-              <td>
-                <Form.Control
-                  type="number"
-                  value={entry.coolBrightness}
-                  min="0"
-                  max="100"
-                  onChange={(e) =>
-                    handleInputChange(
-                      entry.unix_time,
-                      'coolBrightness',
-                      e.target.value
-                    )
-                  }
-                />
-              </td>
-              <td>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleRemoveRow(entry.unix_time)}
-                >
-                  X
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </Row>
+    <div className="d-none d-md-block">
+      {' '}
+      {/* Desktop view */}
+      <Row>
+        <div className="table-responsive">
+          <Table striped bordered hover size="sm">
+            <thead>
+              <tr>
+                <th style={{ width: '20%' }}>Time</th>
+                <th style={{ width: '35%' }}>Warm</th>
+                <th style={{ width: '35%' }}>Cool</th>
+                <th style={{ width: '10%' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.schedule.map((entry: ScheduleEntry) => (
+                <tr key={entry.unix_time}>
+                  <td>{formatTime(entry.time)}</td>
+                  <td>
+                    <Form.Control
+                      type="number"
+                      value={entry.warmBrightness}
+                      min="0"
+                      max="100"
+                      size="sm"
+                      onChange={(e) =>
+                        handleInputChange(
+                          entry.unix_time,
+                          'warmBrightness',
+                          e.target.value
+                        )
+                      }
+                    />
+                  </td>
+                  <td>
+                    <Form.Control
+                      type="number"
+                      value={entry.coolBrightness}
+                      min="0"
+                      max="100"
+                      size="sm"
+                      onChange={(e) =>
+                        handleInputChange(
+                          entry.unix_time,
+                          'coolBrightness',
+                          e.target.value
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="text-center">
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleRemoveRow(entry.unix_time)}
+                    >
+                      X
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      </Row>
+    </div>
+    <div className="d-md-none">
+      {' '}
+      {/* Mobile view */}
+      {data.schedule.map((entry: ScheduleEntry) => (
+        <div key={entry.unix_time} className="border-bottom pb-3 mb-3">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <strong>{formatTime(entry.time)}</strong>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => handleRemoveRow(entry.unix_time)}
+            >
+              X
+            </Button>
+          </div>
+          <div className="mb-2">
+            <label className="form-label">Warm Brightness</label>
+            <Form.Control
+              type="number"
+              value={entry.warmBrightness}
+              min="0"
+              max="100"
+              onChange={(e) =>
+                handleInputChange(
+                  entry.unix_time,
+                  'warmBrightness',
+                  e.target.value
+                )
+              }
+            />
+          </div>
+          <div>
+            <label className="form-label">Cool Brightness</label>
+            <Form.Control
+              type="number"
+              value={entry.coolBrightness}
+              min="0"
+              max="100"
+              onChange={(e) =>
+                handleInputChange(
+                  entry.unix_time,
+                  'coolBrightness',
+                  e.target.value
+                )
+              }
+            />
+          </div>
+        </div>
+      ))}
+    </div>
   </Container>
 );
 
