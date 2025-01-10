@@ -24,6 +24,11 @@ variable "domain_name" {
   type        = string
 }
 
+variable "github_repo" {
+  description = "GitHub repository managing this project"
+  type        = string
+}
+
 variable "project_name" {
   description = "Name for this project which will be prepended to new resources"
   type        = string
