@@ -34,7 +34,7 @@ import {
   Alert,
 } from 'react-bootstrap';
 import axios from 'axios';
-import { handleAxiosError } from '../../utils/error';
+import { handleAxiosError, logErrorToServer } from '../../utils/error';
 import LoadingSpinner from '../LoadingSpinner/spinner';
 import DayNightComponent from './dayNight';
 import { defaultScheduleData, ScheduleData, ScheduleEntry } from './models';
@@ -45,7 +45,7 @@ const lightScheduleURL: string =
   process.env.API_DOMAIN_NAME! + process.env.LIGHT_SCHEDULE_API!;
 
 // The AWS secret token for the light schedule API.
-const awsSecretToken: string = process.env.AWS_SECRET_TOKEN!;
+const awsSecretToken: string = process.env.AWS_LIGHTS_SECRET_TOKEN!;
 
 /**
  * The ScheduleTable component that displays the schedule entries in a table.
@@ -143,41 +143,56 @@ const AddRowForm = ({
   setNewWarmBrightness,
   setNewCoolBrightness,
   handleAddRow,
-}: any) => (
-  <Container className="content-container mb-3 py-3 px-3">
-    <h5>Add Schedule Entry</h5>
-    <Row>
-      <Col>
-        <InputGroup className="mb-3">
-          <Form.Control
-            type="time"
-            value={newTime}
-            onChange={(e) => setNewTime(e.target.value)}
-          />
-          <Form.Control
-            type="number"
-            placeholder="Warm Brightness"
-            value={newWarmBrightness}
-            min="0"
-            max="100"
-            onChange={(e) => setNewWarmBrightness(e.target.value)}
-          />
-          <Form.Control
-            type="number"
-            placeholder="Cool Brightness"
-            value={newCoolBrightness}
-            min="0"
-            max="100"
-            onChange={(e) => setNewCoolBrightness(e.target.value)}
-          />
-          <Button variant="primary" onClick={handleAddRow}>
-            Add
-          </Button>
-        </InputGroup>
-      </Col>
-    </Row>
-  </Container>
-);
+}: any) => {
+  const isFormValid =
+    newTime &&
+    newWarmBrightness !== '' &&
+    newCoolBrightness !== '' &&
+    Number(newWarmBrightness) >= 0 &&
+    Number(newWarmBrightness) <= 100 &&
+    Number(newCoolBrightness) >= 0 &&
+    Number(newCoolBrightness) <= 100;
+
+  return (
+    <Container className="content-container mb-3 py-3 px-3">
+      <h5>Add Schedule Entry</h5>
+      <Row>
+        <Col>
+          <InputGroup className="mb-3">
+            <Form.Control
+              type="time"
+              value={newTime}
+              onChange={(e) => setNewTime(e.target.value)}
+            />
+            <Form.Control
+              type="number"
+              placeholder="Warm Brightness"
+              value={newWarmBrightness}
+              min="0"
+              max="100"
+              onChange={(e) => setNewWarmBrightness(e.target.value)}
+            />
+            <Form.Control
+              type="number"
+              placeholder="Cool Brightness"
+              value={newCoolBrightness}
+              min="0"
+              max="100"
+              onChange={(e) => setNewCoolBrightness(e.target.value)}
+            />
+            <Button
+              variant="primary"
+              onClick={handleAddRow}
+              disabled={!isFormValid}
+            >
+              Add
+            </Button>
+          </InputGroup>
+        </Col>
+      </Row>
+    </Container>
+  );
+};
 
 /**
  * The ModeSelector component that displays buttons to select the mode.
@@ -249,10 +264,15 @@ const LightScheduler = () => {
           setData(response.data);
           setLastSavedData(response.data); // Store initial data
         } else {
-          console.error('Invalid schedule data format', response.data);
+          logErrorToServer(
+            new Error('Invalid schedule data received'),
+            'LightScheduler.fetchSchedule'
+          );
+          setIsSubmissionError(true);
         }
       } catch (error) {
         handleAxiosError(error);
+        setIsSubmissionError(true);
       } finally {
         setIsLoading(false); // Set loading to false after data is fetched
       }
@@ -374,24 +394,31 @@ const LightScheduler = () => {
    * Handles adding a new schedule entry.
    */
   const handleAddRow = () => {
-    if (newTime && newWarmBrightness !== '' && newCoolBrightness !== '') {
-      const newRow: ScheduleEntry = {
-        time: newTime,
-        warmBrightness: Math.min(100, Math.max(0, Number(newWarmBrightness))),
-        coolBrightness: Math.min(100, Math.max(0, Number(newCoolBrightness))),
-        unix_time: Math.floor(
-          new Date(`1970-01-01T${newTime}`).getTime() / 1000
-        ),
-      };
-      const updatedSchedule = [...data.schedule, newRow].sort((a, b) =>
-        a.time.localeCompare(b.time)
-      );
-      setData({ ...data, schedule: updatedSchedule });
-      setUnsavedChanges(true);
-      setNewTime('');
-      setNewWarmBrightness('');
-      setNewCoolBrightness('');
+    if (!newTime || newWarmBrightness === '' || newCoolBrightness === '') {
+      return;
     }
+
+    const newRow: ScheduleEntry = {
+      time: newTime,
+      warmBrightness: Math.min(100, Math.max(0, Number(newWarmBrightness))),
+      coolBrightness: Math.min(100, Math.max(0, Number(newCoolBrightness))),
+      unix_time: Math.floor(new Date(`1970-01-01T${newTime}`).getTime() / 1000),
+    };
+
+    // Remove existing entry with same time if it exists
+    const filteredSchedule = data.schedule.filter(
+      (entry) => entry.time !== newTime
+    );
+
+    const updatedSchedule = [...filteredSchedule, newRow].sort((a, b) =>
+      a.time.localeCompare(b.time)
+    );
+
+    setData({ ...data, schedule: updatedSchedule });
+    setUnsavedChanges(true);
+    setNewTime('');
+    setNewWarmBrightness('');
+    setNewCoolBrightness('');
   };
 
   /**
@@ -417,7 +444,6 @@ const LightScheduler = () => {
     setData({
       ...data,
       [key]: {
-        ...data[key],
         time: newTime,
         unix_time: unix_time,
       },
