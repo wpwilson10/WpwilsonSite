@@ -49,6 +49,27 @@ export interface ScheduleData {
 	update_time_unix: number;
 }
 
+/**
+ * Default schedule data used as initial state and fallback values.
+ *
+ * Provides a base configuration with:
+ * - Mode set to "dayNight"
+ * - Empty schedule array
+ * - Default times for all required schedule entries:
+ *   - Sunrise: 07:00
+ *   - Sunset: 19:30
+ *   - Natural sunset: 19:30
+ *   - Civil twilight begin: 06:30
+ *   - Civil twilight end: 20:00
+ *   - Natural twilight end: 20:00
+ *   - Bed time: 23:00
+ *   - Night time: 23:30
+ * - All brightness values initialized to 0
+ * - Default update time set to 03:00
+ *
+ * @constant
+ * @type {ScheduleData}
+ */
 export const defaultScheduleData: ScheduleData = {
 	mode: "dayNight",
 	schedule: [],

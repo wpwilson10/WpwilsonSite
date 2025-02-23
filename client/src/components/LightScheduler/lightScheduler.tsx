@@ -23,16 +23,7 @@
  */
 
 import { Suspense, useEffect, useState } from "react";
-import {
-	Table,
-	Form,
-	Container,
-	Button,
-	InputGroup,
-	Row,
-	Col,
-	Alert,
-} from "react-bootstrap";
+import { Container, Button, Row, Col, Alert } from "react-bootstrap";
 import axios from "axios";
 import {
 	ErrorFallback,
@@ -40,10 +31,11 @@ import {
 	logErrorBoundary,
 } from "../../utils/error";
 import LoadingSpinner from "../LoadingSpinner/spinner";
-import DayNightComponent from "./dayNight";
+import DayNight from "./DayNight";
 import { defaultScheduleData, ScheduleData, ScheduleEntry } from "./models";
-import { formatTime, isValidScheduleData } from "./utils";
+import { isValidScheduleData } from "./utils";
 import { ErrorBoundary } from "react-error-boundary";
+import { ScheduledEntryTable, AddScheduleEntry } from "./ScheduledEntryTable";
 
 // The server URL for the light schedule API.
 const lightScheduleURL: string =
@@ -51,217 +43,6 @@ const lightScheduleURL: string =
 
 // The AWS secret token for the light schedule API.
 const awsSecretToken: string = process.env.AWS_LIGHTS_SECRET_TOKEN!;
-
-/**
- * The ScheduleTable component that displays the schedule entries in a table.
- *
- * @component
- * @param {Object} props - The props passed to the component.
- * @param {ScheduleData} props.data - The schedule data.
- * @param {Function} props.handleInputChange - The function to handle input changes.
- * @param {Function} props.handleRemoveRow - The function to handle row removal.
- * @returns {ReactElement} The ScheduleTable component.
- */
-const ScheduleTable = ({ data, handleInputChange, handleRemoveRow }: any) => (
-	<Container className="content-container mb-3 py-3 px-3">
-		<h5>Schedule Configuration</h5>
-		<div className="d-none d-md-block">
-			{" "}
-			{/* Desktop view */}
-			<Row>
-				<div className="table-responsive">
-					<Table striped bordered hover size="sm">
-						<thead>
-							<tr>
-								<th style={{ width: "20%" }}>Time</th>
-								<th style={{ width: "35%" }}>Warm</th>
-								<th style={{ width: "35%" }}>Cool</th>
-								<th style={{ width: "10%" }}>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{data.schedule.map((entry: ScheduleEntry) => (
-								<tr key={entry.unix_time}>
-									<td>{formatTime(entry.time)}</td>
-									<td>
-										<Form.Control
-											type="number"
-											value={entry.warmBrightness}
-											min="0"
-											max="100"
-											size="sm"
-											onChange={(e) =>
-												handleInputChange(
-													entry.unix_time,
-													"warmBrightness",
-													e.target.value
-												)
-											}
-										/>
-									</td>
-									<td>
-										<Form.Control
-											type="number"
-											value={entry.coolBrightness}
-											min="0"
-											max="100"
-											size="sm"
-											onChange={(e) =>
-												handleInputChange(
-													entry.unix_time,
-													"coolBrightness",
-													e.target.value
-												)
-											}
-										/>
-									</td>
-									<td className="text-center">
-										<Button
-											variant="danger"
-											size="sm"
-											onClick={() =>
-												handleRemoveRow(entry.unix_time)
-											}
-										>
-											X
-										</Button>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</Table>
-				</div>
-			</Row>
-		</div>
-		<div className="d-md-none">
-			{" "}
-			{/* Mobile view */}
-			{data.schedule.map((entry: ScheduleEntry) => (
-				<div key={entry.unix_time} className="border-bottom pb-3 mb-3">
-					<div className="d-flex justify-content-between align-items-center mb-2">
-						<strong>{formatTime(entry.time)}</strong>
-						<Button
-							variant="danger"
-							size="sm"
-							onClick={() => handleRemoveRow(entry.unix_time)}
-						>
-							X
-						</Button>
-					</div>
-					<div className="mb-2">
-						<label className="form-label">Warm Brightness</label>
-						<Form.Control
-							type="number"
-							value={entry.warmBrightness}
-							min="0"
-							max="100"
-							onChange={(e) =>
-								handleInputChange(
-									entry.unix_time,
-									"warmBrightness",
-									e.target.value
-								)
-							}
-						/>
-					</div>
-					<div>
-						<label className="form-label">Cool Brightness</label>
-						<Form.Control
-							type="number"
-							value={entry.coolBrightness}
-							min="0"
-							max="100"
-							onChange={(e) =>
-								handleInputChange(
-									entry.unix_time,
-									"coolBrightness",
-									e.target.value
-								)
-							}
-						/>
-					</div>
-				</div>
-			))}
-		</div>
-	</Container>
-);
-
-/**
- * The AddRowForm component that displays a form to add a new schedule entry.
- *
- * @component
- * @param {Object} props - The props passed to the component.
- * @param {string} props.newTime - The new time value.
- * @param {string} props.newWarmBrightness - The new warm brightness value.
- * @param {string} props.newCoolBrightness - The new cool brightness value.
- * @param {Function} props.setNewTime - The function to set the new time value.
- * @param {Function} props.setNewWarmBrightness - The function to set the new warm brightness value.
- * @param {Function} props.setNewCoolBrightness - The function to set the new cool brightness value.
- * @param {Function} props.handleAddRow - The function to handle adding a new row.
- * @returns {ReactElement} The AddRowForm component.
- */
-const AddRowForm = ({
-	newTime,
-	newWarmBrightness,
-	newCoolBrightness,
-	setNewTime,
-	setNewWarmBrightness,
-	setNewCoolBrightness,
-	handleAddRow,
-}: any) => {
-	const isFormValid =
-		newTime &&
-		newWarmBrightness !== "" &&
-		newCoolBrightness !== "" &&
-		Number(newWarmBrightness) >= 0 &&
-		Number(newWarmBrightness) <= 100 &&
-		Number(newCoolBrightness) >= 0 &&
-		Number(newCoolBrightness) <= 100;
-
-	return (
-		<Container className="content-container mb-3 py-3 px-3">
-			<h5>Add Schedule Entry</h5>
-			<Row>
-				<Col>
-					<InputGroup className="mb-3">
-						<Form.Control
-							type="time"
-							value={newTime}
-							onChange={(e) => setNewTime(e.target.value)}
-						/>
-						<Form.Control
-							type="number"
-							placeholder="Warm Brightness"
-							value={newWarmBrightness}
-							min="0"
-							max="100"
-							onChange={(e) =>
-								setNewWarmBrightness(e.target.value)
-							}
-						/>
-						<Form.Control
-							type="number"
-							placeholder="Cool Brightness"
-							value={newCoolBrightness}
-							min="0"
-							max="100"
-							onChange={(e) =>
-								setNewCoolBrightness(e.target.value)
-							}
-						/>
-						<Button
-							variant="primary"
-							onClick={handleAddRow}
-							disabled={!isFormValid}
-						>
-							Add
-						</Button>
-					</InputGroup>
-				</Col>
-			</Row>
-		</Container>
-	);
-};
 
 /**
  * The ModeSelector component that displays buttons to select the mode.
@@ -587,7 +368,7 @@ const LightScheduler = () => {
 					/>
 
 					{data.mode === "dayNight" && (
-						<DayNightComponent
+						<DayNight
 							data={data}
 							handleInputChange={handleInputChange}
 							handleTimeChange={handleTimeChange}
@@ -596,12 +377,12 @@ const LightScheduler = () => {
 
 					{data.mode === "scheduled" && (
 						<>
-							<ScheduleTable
+							<ScheduledEntryTable
 								data={data}
 								handleInputChange={handleInputChange}
 								handleRemoveRow={handleRemoveRow}
 							/>
-							<AddRowForm
+							<AddScheduleEntry
 								newTime={newTime}
 								newWarmBrightness={newWarmBrightness}
 								newCoolBrightness={newCoolBrightness}
