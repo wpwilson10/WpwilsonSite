@@ -8,10 +8,10 @@
  * @property {number} unix_time - The Unix timestamp for this schedule entry.
  */
 export interface ScheduleEntry {
-  time: string;
-  warmBrightness: number;
-  coolBrightness: number;
-  unix_time: number;
+	time: string;
+	warmBrightness: number;
+	coolBrightness: number;
+	unix_time: number;
 }
 
 /**
@@ -35,56 +35,92 @@ export interface ScheduleEntry {
  * @property {number} update_time_unix - The Unix timestamp when the schedule was last updated.
  */
 export interface ScheduleData {
-  mode: 'dayNight' | 'scheduled' | 'demo';
-  schedule: ScheduleEntry[];
-  sunrise: ScheduleEntry;
-  sunset: ScheduleEntry;
-  natural_sunset: ScheduleEntry;
-  civil_twilight_begin: ScheduleEntry;
-  civil_twilight_end: ScheduleEntry;
-  natural_twilight_end: ScheduleEntry;
-  bed_time: ScheduleEntry;
-  night_time: ScheduleEntry;
-  update_time: string;
-  update_time_unix: number;
+	mode: "dayNight" | "scheduled" | "demo";
+	schedule: ScheduleEntry[];
+	sunrise: ScheduleEntry;
+	sunset: ScheduleEntry;
+	natural_sunset: ScheduleEntry;
+	civil_twilight_begin: ScheduleEntry;
+	civil_twilight_end: ScheduleEntry;
+	natural_twilight_end: ScheduleEntry;
+	bed_time: ScheduleEntry;
+	night_time: ScheduleEntry;
+	update_time: string;
+	update_time_unix: number;
 }
 
+/**
+ * Default schedule data used as initial state and fallback values.
+ *
+ * Provides a base configuration with:
+ * - Mode set to "dayNight"
+ * - Empty schedule array
+ * - Default times for all required schedule entries:
+ *   - Sunrise: 07:00
+ *   - Sunset: 19:30
+ *   - Natural sunset: 19:30
+ *   - Civil twilight begin: 06:30
+ *   - Civil twilight end: 20:00
+ *   - Natural twilight end: 20:00
+ *   - Bed time: 23:00
+ *   - Night time: 23:30
+ * - All brightness values initialized to 0
+ * - Default update time set to 03:00
+ *
+ * @constant
+ * @type {ScheduleData}
+ */
 export const defaultScheduleData: ScheduleData = {
-  mode: 'scheduled',
-  schedule: [],
-  sunrise: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
-  sunset: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
-  natural_sunset: {
-    time: '',
-    unix_time: 0,
-    warmBrightness: 0,
-    coolBrightness: 0,
-  },
-  civil_twilight_begin: {
-    time: '',
-    unix_time: 0,
-    warmBrightness: 0,
-    coolBrightness: 0,
-  },
-  civil_twilight_end: {
-    time: '',
-    unix_time: 0,
-    warmBrightness: 0,
-    coolBrightness: 0,
-  },
-  natural_twilight_end: {
-    time: '',
-    unix_time: 0,
-    warmBrightness: 0,
-    coolBrightness: 0,
-  },
-  bed_time: { time: '', unix_time: 0, warmBrightness: 0, coolBrightness: 0 },
-  night_time: {
-    time: '',
-    unix_time: 0,
-    warmBrightness: 0,
-    coolBrightness: 0,
-  },
-  update_time: '03:00',
-  update_time_unix: Math.floor(new Date(`1970-01-01T03:00`).getTime() / 1000),
+	mode: "dayNight",
+	schedule: [],
+	sunrise: {
+		time: "07:00",
+		unix_time: 0,
+		warmBrightness: 0,
+		coolBrightness: 0,
+	},
+	sunset: {
+		time: "19:30",
+		unix_time: 0,
+		warmBrightness: 0,
+		coolBrightness: 0,
+	},
+	natural_sunset: {
+		time: "19:30",
+		unix_time: 0,
+		warmBrightness: 0,
+		coolBrightness: 0,
+	},
+	civil_twilight_begin: {
+		time: "06:30",
+		unix_time: 0,
+		warmBrightness: 0,
+		coolBrightness: 0,
+	},
+	civil_twilight_end: {
+		time: "20:00",
+		unix_time: 0,
+		warmBrightness: 0,
+		coolBrightness: 0,
+	},
+	natural_twilight_end: {
+		time: "20:00",
+		unix_time: 0,
+		warmBrightness: 0,
+		coolBrightness: 0,
+	},
+	bed_time: {
+		time: "23:00",
+		unix_time: 0,
+		warmBrightness: 0,
+		coolBrightness: 0,
+	},
+	night_time: {
+		time: "23:30",
+		unix_time: 0,
+		warmBrightness: 0,
+		coolBrightness: 0,
+	},
+	update_time: "03:00",
+	update_time_unix: Math.floor(new Date(`1970-01-01T03:00`).getTime() / 1000),
 };

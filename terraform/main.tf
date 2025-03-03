@@ -208,7 +208,7 @@ module "api_gateway" {
   cors_configuration = {
     allow_headers = ["content-type", "x-custom-auth"]
     allow_methods = ["GET", "OPTIONS", "POST"]
-    allow_origins = [local.site_URL, "http://${module.client_files_s3_bucket.s3_bucket_website_endpoint}"]
+    allow_origins = [local.site_URL, local.site_www_URL, "http://${module.client_files_s3_bucket.s3_bucket_website_endpoint}"]
   }
 
   # Fixes - Error: no matching Route 53 Hosted Zone found
