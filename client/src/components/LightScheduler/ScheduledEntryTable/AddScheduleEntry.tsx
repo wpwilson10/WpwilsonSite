@@ -9,22 +9,18 @@ import { AddScheduleEntryProps } from "./types";
  * @returns {ReactElement} The AddScheduleEntry component
  */
 export const AddScheduleEntry = ({
-	newTime,
-	newWarmBrightness,
-	newCoolBrightness,
-	setNewTime,
-	setNewWarmBrightness,
-	setNewCoolBrightness,
-	handleAddRow,
+	newEntry,
+	onEntryChange,
+	onAddEntry,
 }: AddScheduleEntryProps) => {
 	const isFormValid =
-		newTime &&
-		newWarmBrightness !== "" &&
-		newCoolBrightness !== "" &&
-		Number(newWarmBrightness) >= 0 &&
-		Number(newWarmBrightness) <= 100 &&
-		Number(newCoolBrightness) >= 0 &&
-		Number(newCoolBrightness) <= 100;
+		newEntry.time &&
+		newEntry.warmBrightness !== "" &&
+		newEntry.coolBrightness !== "" &&
+		Number(newEntry.warmBrightness) >= 0 &&
+		Number(newEntry.warmBrightness) <= 100 &&
+		Number(newEntry.coolBrightness) >= 0 &&
+		Number(newEntry.coolBrightness) <= 100;
 
 	return (
 		<Container className="content-container mb-3 py-3 px-3">
@@ -34,32 +30,34 @@ export const AddScheduleEntry = ({
 					<InputGroup className="mb-3">
 						<Form.Control
 							type="time"
-							value={newTime}
-							onChange={(e) => setNewTime(e.target.value)}
+							value={newEntry.time}
+							onChange={(e) =>
+								onEntryChange("time", e.target.value)
+							}
 						/>
 						<Form.Control
 							type="number"
 							placeholder="Warm Brightness"
-							value={newWarmBrightness}
+							value={newEntry.warmBrightness}
 							min="0"
 							max="100"
 							onChange={(e) =>
-								setNewWarmBrightness(e.target.value)
+								onEntryChange("warmBrightness", e.target.value)
 							}
 						/>
 						<Form.Control
 							type="number"
 							placeholder="Cool Brightness"
-							value={newCoolBrightness}
+							value={newEntry.coolBrightness}
 							min="0"
 							max="100"
 							onChange={(e) =>
-								setNewCoolBrightness(e.target.value)
+								onEntryChange("coolBrightness", e.target.value)
 							}
 						/>
 						<Button
 							variant="primary"
-							onClick={handleAddRow}
+							onClick={onAddEntry}
 							disabled={!isFormValid}
 						>
 							Add

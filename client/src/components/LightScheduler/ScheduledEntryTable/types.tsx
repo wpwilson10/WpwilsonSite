@@ -37,23 +37,24 @@ export interface ScheduledEntryViewProps {
 }
 
 /**
- * Props for the AddScheduleEntry component.
- *
+ * Props interface for the AddScheduleEntry component
  * @interface AddScheduleEntryProps
- * @property {string} newTime - The new time value
- * @property {string} newWarmBrightness - The new warm brightness value
- * @property {string} newCoolBrightness - The new cool brightness value
- * @property {Function} setNewTime - Function to update the time value
- * @property {Function} setNewWarmBrightness - Function to update the warm brightness value
- * @property {Function} setNewCoolBrightness - Function to update the cool brightness value
- * @property {Function} handleAddRow - Function to handle adding a new row
+ *
+ * @property {Object} newEntry - Object containing the values for a new schedule entry
+ * @property {string} newEntry.time - The time value for the schedule entry
+ * @property {string} newEntry.warmBrightness - The warm brightness value for the schedule entry
+ * @property {string} newEntry.coolBrightness - The cool brightness value for the schedule entry
+ * @property {function} onEntryChange - Callback function when an entry field changes
+ * @param {string} field - The field name that changed
+ * @param {string} value - The new value for the field
+ * @property {function} onAddEntry - Callback function when adding a new entry
  */
 export interface AddScheduleEntryProps {
-	newTime: string;
-	newWarmBrightness: string;
-	newCoolBrightness: string;
-	setNewTime: (value: string) => void;
-	setNewWarmBrightness: (value: string) => void;
-	setNewCoolBrightness: (value: string) => void;
-	handleAddRow: () => void;
+	newEntry: {
+		time: string;
+		warmBrightness: string;
+		coolBrightness: string;
+	};
+	onEntryChange: (field: string, value: string) => void;
+	onAddEntry: () => void;
 }
