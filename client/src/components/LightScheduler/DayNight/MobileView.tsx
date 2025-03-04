@@ -1,5 +1,5 @@
 import { Form } from "react-bootstrap";
-import { formatTime } from "../utils";
+import { formatTime, handleNumericInput } from "../utils";
 import {
 	DaylightScheduleProps,
 	scheduleEntries,
@@ -44,9 +44,12 @@ export const MobileView = ({
 					<label className="form-label">Warm Brightness</label>
 					<Form.Control
 						type="number"
+						inputMode="numeric"
+						pattern="[0-9]*"
 						value={data[key].warmBrightness}
 						min="0"
 						max="100"
+						onInput={handleNumericInput}
 						onChange={(e) =>
 							handleInputChange(
 								data[key].unix_time,
@@ -60,9 +63,12 @@ export const MobileView = ({
 					<label className="form-label">Cool Brightness</label>
 					<Form.Control
 						type="number"
+						inputMode="numeric"
+						pattern="[0-9]*"
 						value={data[key].coolBrightness}
 						min="0"
 						max="100"
+						onInput={handleNumericInput}
 						onChange={(e) =>
 							handleInputChange(
 								data[key].unix_time,

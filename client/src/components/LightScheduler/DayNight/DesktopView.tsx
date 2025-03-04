@@ -1,5 +1,5 @@
 import { Table, Form } from "react-bootstrap";
-import { formatTime } from "../utils";
+import { formatTime, handleNumericInput } from "../utils";
 import {
 	DaylightScheduleProps,
 	scheduleEntries,
@@ -56,6 +56,7 @@ export const DesktopView = ({
 								min="0"
 								max="100"
 								size="sm"
+								onInput={handleNumericInput}
 								onChange={(e) =>
 									handleInputChange(
 										data[key].unix_time,
@@ -72,6 +73,7 @@ export const DesktopView = ({
 								min="0"
 								max="100"
 								size="sm"
+								onInput={handleNumericInput}
 								onChange={(e) =>
 									handleInputChange(
 										data[key].unix_time,
