@@ -66,15 +66,30 @@ export const useScheduleHandlers = (
 		key: "bed_time" | "night_time",
 		newTime: string
 	) => {
-		const unix_time = Math.floor(
-			new Date(`1970-01-01T${newTime}`).getTime() / 1000
+		// Get current date
+		const today = new Date();
+		const [hours, minutes] = newTime.split(":");
+
+		// Create new date with today's date but with new time
+		const newDate = new Date(
+			today.getFullYear(),
+			today.getMonth(),
+			today.getDate(),
+			parseInt(hours),
+			parseInt(minutes)
 		);
+
+		const unix_time = Math.floor(newDate.getTime() / 1000);
 
 		dispatch({
 			type: "SET_DATA",
 			payload: {
 				...state.data,
-				[key]: { time: newTime, unix_time },
+				[key]: {
+					...state.data[key], // Preserve existing fields
+					time: newTime,
+					unix_time,
+				},
 			},
 		});
 	};

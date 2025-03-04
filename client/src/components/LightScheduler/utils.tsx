@@ -75,3 +75,9 @@ export const formatTime = (time: string): string => {
 	const hour12 = hours % 12 || 12;
 	return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
 };
+
+export const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+	// Remove leading zeros and ensure value is between 0-100
+	const value = e.target.value.replace(/^0+/, "") || "0";
+	e.target.value = Math.min(100, Math.max(0, Number(value))).toString();
+};

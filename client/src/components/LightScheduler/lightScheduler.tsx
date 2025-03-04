@@ -22,7 +22,7 @@
  * @returns {ReactElement} The LightScheduler component.
  */
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Container, Button, Row, Col, Alert } from "react-bootstrap";
 import { ErrorFallback, logErrorBoundary } from "../../utils/error";
 import LoadingSpinner from "../LoadingSpinner/spinner";
@@ -48,6 +48,13 @@ const LightScheduler = () => {
 	const { state, dispatch, saveSchedule } = useScheduleData();
 	// Handlers is the set of functions passed to subcomponenets to let them update state.
 	const handlers = useScheduleHandlers(state, dispatch);
+
+	// Add scroll to top after submit (useful for mobile)
+	useEffect(() => {
+		if (state.status.isSuccessfullySubmitted) {
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		}
+	}, [state.status.isSuccessfullySubmitted]);
 
 	// Prevent render until data is loaded
 	if (state.status.isLoading) {
@@ -141,7 +148,7 @@ const LightScheduler = () => {
 							</Button>
 							<Button
 								variant="success"
-								onClick={() => saveSchedule()}
+								onClick={saveSchedule}
 								disabled={!state.status.unsavedChanges}
 							>
 								Save Changes
