@@ -14,11 +14,13 @@ import { createRoot } from "react-dom/client";
 import React from "react";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "react-oidc-context";
 
 import "./index.css";
 import App from "./App";
 import { store } from "./store/store";
 import { logErrorToServer } from "./utils/error";
+import { cognitoAuthConfig } from "./auth/authConfig";
 
 // React 18
 const container = document.getElementById("root") as HTMLElement;
@@ -31,19 +33,24 @@ try {
 		// See https://react.dev/reference/react/StrictMode
 		<React.StrictMode>
 			{/*
-			 * Makes the Redux store available to any nested components that need to access to the store.
-			 * See https://react-redux.js.org/api/provider
+			 * Setting up authentication using Amazon Cognito's OAuth/OpenID
 			 */}
-			<Provider store={store}>
+			<AuthProvider {...cognitoAuthConfig}>
 				{/*
-				 * Enables the single page app to to navigate between different views without refreshing the whole webpage.
-				 * See https://reactrouter.com/en/main/router-components/browser-router
+				 * Makes the Redux store available to any nested components that need to access to the store.
+				 * See https://react-redux.js.org/api/provider
 				 */}
-				<BrowserRouter>
-					{/* The main application component */}
-					<App />
-				</BrowserRouter>
-			</Provider>
+				<Provider store={store}>
+					{/*
+					 * Enables the single page app to to navigate between different views without refreshing the whole webpage.
+					 * See https://reactrouter.com/en/main/router-components/browser-router
+					 */}
+					<BrowserRouter>
+						{/* The main application component */}
+						<App />
+					</BrowserRouter>
+				</Provider>
+			</AuthProvider>
 		</React.StrictMode>
 	);
 } catch (e) {
