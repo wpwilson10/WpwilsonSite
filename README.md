@@ -12,11 +12,6 @@ This repository contains the frontend for the **WpwilsonSite** project, built wi
 - [Project Structure](#project-structure)
 - [Setup and Installation](#setup-and-installation)
 - [Configuration](#configuration)
-- [Development](#development)
-- [Production](#production)
-- [Testing & CI/CD](#testing--cicd)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
