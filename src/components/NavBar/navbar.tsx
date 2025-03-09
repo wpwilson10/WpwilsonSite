@@ -9,12 +9,10 @@
  * @returns {ReactElement} a react component for the NavBar
  */
 
-import { Badge, Container, Nav, Navbar } from "react-bootstrap";
-import { FaShoppingCart } from "react-icons/fa";
-import { useSelector } from "react-redux";
-import { useAppDispatch } from "../../store/store";
-import { selectCartTotalQuantity, setIsOpen } from "../../store/shoppingCart";
+import { Container, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import AuthButton from "./AuthButton";
+import ShoppingCartButton from "./ShoppingCareButton";
 
 // Define the NavBar component
 const NavBar = () => {
@@ -38,41 +36,18 @@ const NavBar = () => {
 };
 
 /**
- * NavRight displays a shopping cart icon with the number of items in the cart
- * which will render on the right side a navigation bar
+ * NavRight displays authentication and shopping cart buttons
  *
  * @component
- * @param {Object} props The props passed to the component. (Currently empty)
  * @returns {ReactElement} a react component for the right side of the NavBar
  */
 const NavRight = () => {
-	const quantity = useSelector(selectCartTotalQuantity);
-	// useAppDispatch to make typescript happy with thunks
-	// https://redux-toolkit.js.org/usage/usage-with-typescript#getting-the-dispatch-type
-	const dispatch = useAppDispatch();
-
-	const openCart = () => {
-		dispatch(setIsOpen(true));
-	};
-
-	if (quantity > 0) {
-		return (
-			<Nav className="ms-auto" onSelect={openCart}>
-				<Nav.Link href="#" eventKey="cart" as="span">
-					<FaShoppingCart size="1.5em" />{" "}
-					<Badge bg="primary">{quantity}</Badge>
-				</Nav.Link>
-			</Nav>
-		);
-	} else {
-		return (
-			<Nav className="ms-auto" onSelect={openCart}>
-				<Nav.Link href="#" eventKey="cart" as="span">
-					<FaShoppingCart size="1.5em" />{" "}
-				</Nav.Link>
-			</Nav>
-		);
-	}
+	return (
+		<Nav className="ms-auto d-flex align-items-center gap-3">
+			<ShoppingCartButton />
+			<AuthButton />
+		</Nav>
+	);
 };
 
 /**
