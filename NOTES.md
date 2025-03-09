@@ -1,10 +1,3 @@
-# Setup
-
-## Building Project
-
-1. Run "npm run dev" to build app in development mode or "npm run prod" to run in production mode.
-2. Move files from /client/dist to /server/web. The server will be looking for files here to serve to users.
-
 ## Initial Project Setup
 
 The client directory was created using npx create-react-app name-of-app --template typescript
@@ -18,27 +11,27 @@ Webpack is used to compile the project instead of npm create react app for more 
 
 The below items should be updated for your copies of the site.
 
--   webpack.common.js
-    -   title
--   package.json
-    -   name and version
--   Index.html
-    -   Meta tages for Author and Description
--   Favicons and site.webmanifest
-    -   Files live in /public
-    -   Examples created using [favicon.io](https://favicon.io/favicon-converter/)
--   Profile image
-    -   Hard coded to /public/images/profile_square_small.jpg
--   Contact Info
-    -   Links to various social medias and communication options
-    -   GITHUB_LINK, LINKEDIN_LINK, EMAIL_ADDRESS in .env files
--   About Me and Home page text
-    -   Text shown in those components live in the aboutme.tsx and home.tsx files respectively
--   reCAPTCHA site key - Spam protection. [Sign up here](https://developers.google.com/recaptcha) - RECAPTCHA_SITE_KEY in .env files
-    The below items may be updated if desired.
--   APIs
-    -   CONTACT_FORM_API, PRODUCT_API, ERROR_API, CHECKOUT_API in .env files
-    -   these should match the routes from the server file
+- webpack.common.js
+    - title
+- package.json
+    - name and version
+- Index.html
+    - Meta tages for Author and Description
+- Favicons and site.webmanifest
+    - Files live in /public
+    - Examples created using [favicon.io](https://favicon.io/favicon-converter/)
+- Profile image
+    - Hard coded to /public/images/profile_square_small.jpg
+- Contact Info
+    - Links to various social medias and communication options
+    - GITHUB_LINK, LINKEDIN_LINK, EMAIL_ADDRESS in .env files
+- About Me and Home page text
+    - Text shown in those components live in the aboutme.tsx and home.tsx files respectively
+- reCAPTCHA site key - Spam protection. [Sign up here](https://developers.google.com/recaptcha) - RECAPTCHA_SITE_KEY in .env files
+  The below items may be updated if desired.
+- APIs
+    - CONTACT_FORM_API, PRODUCT_API, ERROR_API, CHECKOUT_API in .env files
+    - these should match the routes from the server file
 
 # File descriptions
 
@@ -50,11 +43,11 @@ The `index.d.ts` file is a declaration file that contains type definitions for y
 
 Some of the information that you can specify in the `index.d.ts` file are:
 
--   `export`: A keyword that indicates that a variable, function, class or interface is exported from your module and can be imported by other modules.
--   `import`: A keyword that indicates that a variable, function, class or interface is imported from another module and can be used in your module.
--   `declare`: A keyword that indicates that a variable, function, class or interface is declared but not defined in your module. It can be used to describe external entities that are not part of your module, such as global variables or third-party libraries.
--   `interface`: A keyword that defines a type that describes the shape of an object. It can have properties and methods that specify the names and types of the object's members.
--   `type`: A keyword that defines a type alias that can be used as a shorthand for a more complex type. It can be composed of primitive types, union types, intersection types, literal types or other type aliases.
+- `export`: A keyword that indicates that a variable, function, class or interface is exported from your module and can be imported by other modules.
+- `import`: A keyword that indicates that a variable, function, class or interface is imported from another module and can be used in your module.
+- `declare`: A keyword that indicates that a variable, function, class or interface is declared but not defined in your module. It can be used to describe external entities that are not part of your module, such as global variables or third-party libraries.
+- `interface`: A keyword that defines a type that describes the shape of an object. It can have properties and methods that specify the names and types of the object's members.
+- `type`: A keyword that defines a type alias that can be used as a shorthand for a more complex type. It can be composed of primitive types, union types, intersection types, literal types or other type aliases.
 
 You can find more information about the `index.d.ts` file and its syntax on the [official TypeScript documentation](https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html).
 
@@ -68,15 +61,15 @@ You should update the `package.json` file whenever you want to change the name, 
 
 Some of the information that you can specify in the `package.json` file are:
 
--   `name`: The name of your project. It should be unique and follow the [npm naming guidelines](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name).
--   `version`: The current version of your project. It should follow the [semantic versioning](https://semver.org/) scheme.
--   `description`: A short description of your project. It can be used by search engines and other tools to display information about your project.
--   `main`: The entry point of your project. It is the file that will be executed when you run `npm start` or `node .`.
--   `scripts`: A set of commands that you can run using `npm run <script-name>`. For example, you can define a script to build, test or deploy your project.
--   `dependencies`: A list of packages that your project depends on. These packages will be installed in the `node_modules` folder when you run `npm install`.
--   `devDependencies`: A list of packages that are only needed for development purposes, such as testing or linting tools. These packages will not be installed in production environments.
--   `peerDependencies`: A list of packages that your project expects to be installed by the user or the host environment. These packages will not be installed by `npm`, but will be checked for compatibility.
--   `engines`: A list of Node.js versions that your project supports. This can help prevent installation errors or runtime issues on incompatible platforms.
+- `name`: The name of your project. It should be unique and follow the [npm naming guidelines](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name).
+- `version`: The current version of your project. It should follow the [semantic versioning](https://semver.org/) scheme.
+- `description`: A short description of your project. It can be used by search engines and other tools to display information about your project.
+- `main`: The entry point of your project. It is the file that will be executed when you run `npm start` or `node .`.
+- `scripts`: A set of commands that you can run using `npm run <script-name>`. For example, you can define a script to build, test or deploy your project.
+- `dependencies`: A list of packages that your project depends on. These packages will be installed in the `node_modules` folder when you run `npm install`.
+- `devDependencies`: A list of packages that are only needed for development purposes, such as testing or linting tools. These packages will not be installed in production environments.
+- `peerDependencies`: A list of packages that your project expects to be installed by the user or the host environment. These packages will not be installed by `npm`, but will be checked for compatibility.
+- `engines`: A list of Node.js versions that your project supports. This can help prevent installation errors or runtime issues on incompatible platforms.
 
 You can find more information about the `package.json` file and its properties on the [official npm documentation](https://docs.npmjs.com/cli/v7/configuring-npm/package-json).
 
@@ -90,11 +83,11 @@ You do not need to manually update the `package-lock.json` file. It will be auto
 
 Some of the information that you can find in the `package-lock.json` file are:
 
--   `name`: The name of your project, as specified in the `package.json` file.
--   `version`: The version of your project, as specified in the `package.json` file.
--   `lockfileVersion`: The version of the lock file format. It should be 1 for `npm` versions 5 and 6, and 2 for `npm` version 7 or higher.
--   `requires`: A boolean value that indicates whether the dependencies are specified with a range or an exact version in the `package.json` file.
--   `dependencies`: An object that contains the information about each package that your project depends on. It includes the name, version, resolved URL, integrity hash, dependencies and other metadata of each package.
+- `name`: The name of your project, as specified in the `package.json` file.
+- `version`: The version of your project, as specified in the `package.json` file.
+- `lockfileVersion`: The version of the lock file format. It should be 1 for `npm` versions 5 and 6, and 2 for `npm` version 7 or higher.
+- `requires`: A boolean value that indicates whether the dependencies are specified with a range or an exact version in the `package.json` file.
+- `dependencies`: An object that contains the information about each package that your project depends on. It includes the name, version, resolved URL, integrity hash, dependencies and other metadata of each package.
 
 You can find more information about the `package-lock.json` file and its structure on the [official npm documentation](https://docs.npmjs.com/cli/v7/configuring-npm/package-lock-json).
 
@@ -106,10 +99,10 @@ The `tsconfig.json` file is a configuration file that contains options for the T
 
 Some of the options that you can specify in the `tsconfig.json` file are:
 
--   `compilerOptions`: An object that contains various settings for the TypeScript compiler, such as the target JavaScript version, the module system, the source map generation, the type checking rules and more.
--   `include`: An array of glob patterns that specify which files or folders to include in the compilation. By default, all `.ts` and `.tsx` files in your project are included.
--   `exclude`: An array of glob patterns that specify which files or folders to exclude from the compilation. By default, the `node_modules`, `bower_components`, `jspm_packages` and `<outDir>` folders are excluded.
--   `extends`: A string that specifies another configuration file to inherit from. This can be useful to share common settings across multiple projects or environments.
+- `compilerOptions`: An object that contains various settings for the TypeScript compiler, such as the target JavaScript version, the module system, the source map generation, the type checking rules and more.
+- `include`: An array of glob patterns that specify which files or folders to include in the compilation. By default, all `.ts` and `.tsx` files in your project are included.
+- `exclude`: An array of glob patterns that specify which files or folders to exclude from the compilation. By default, the `node_modules`, `bower_components`, `jspm_packages` and `<outDir>` folders are excluded.
+- `extends`: A string that specifies another configuration file to inherit from. This can be useful to share common settings across multiple projects or environments.
 
 You can find more information about the `tsconfig.json` file and its options on the [official TypeScript documentation](https://www.typescriptlang.org/tsconfig).
 
@@ -123,12 +116,12 @@ This file is used as a base for webpack settings that are the extended by the `w
 
 Some of the options that you can specify in the `webpack.common.js` file are:
 
--   `entry`: An object that specifies the entry points of your application. Each entry point is a file that imports or requires other files and modules. Webpack will start from these files and create a dependency graph of your application.
--   `output`: An object that specifies the output options for your bundles. It includes the path, filename, public path and other properties of the output files.
--   `output.filename: '[name].[contenthash].js'`: This sets the output filename to include a content-based hash, which helps with caching and invalidation. ²
--   `module`: An object that specifies how different types of modules are treated by Webpack. It includes rules for loaders, which are plugins that transform the source code of your modules before bundling them.
--   `plugins`: An array of plugins that enhance the functionality of Webpack. Plugins can perform tasks such as generating HTML files, optimizing bundles, injecting variables and more.
--   `resolve`: An object that specifies how Webpack resolves the modules that are imported or required by your files. It includes extensions, aliases, modules and other properties that affect the module resolution process.
+- `entry`: An object that specifies the entry points of your application. Each entry point is a file that imports or requires other files and modules. Webpack will start from these files and create a dependency graph of your application.
+- `output`: An object that specifies the output options for your bundles. It includes the path, filename, public path and other properties of the output files.
+- `output.filename: '[name].[contenthash].js'`: This sets the output filename to include a content-based hash, which helps with caching and invalidation. ²
+- `module`: An object that specifies how different types of modules are treated by Webpack. It includes rules for loaders, which are plugins that transform the source code of your modules before bundling them.
+- `plugins`: An array of plugins that enhance the functionality of Webpack. Plugins can perform tasks such as generating HTML files, optimizing bundles, injecting variables and more.
+- `resolve`: An object that specifies how Webpack resolves the modules that are imported or required by your files. It includes extensions, aliases, modules and other properties that affect the module resolution process.
 
 You can find more information about the `webpack.common.js` file and its options on the [official Webpack documentation](https://webpack.js.org/configuration/).
 
@@ -164,8 +157,8 @@ The `webpack.dev.js` file is a configuration file that contains development-spec
 
 Some of the options that you can specify in the `webpack.dev.js` file are:
 
--   `mode`: A string that specifies the mode of Webpack. It can be either `development` or `production`. Setting it to `development` enables some optimizations and features that are useful for development, such as source maps, caching and hot module replacement¹.
--   `devtool`: A string that specifies the type of source map to generate for debugging purposes. Source maps are files that map the bundled code to the original source code, allowing you to inspect and debug your code in the browser¹⁴.
+- `mode`: A string that specifies the mode of Webpack. It can be either `development` or `production`. Setting it to `development` enables some optimizations and features that are useful for development, such as source maps, caching and hot module replacement¹.
+- `devtool`: A string that specifies the type of source map to generate for debugging purposes. Source maps are files that map the bundled code to the original source code, allowing you to inspect and debug your code in the browser¹⁴.
 
 You can find more information about the `webpack.dev.js` file and its options at [Webpack's Production](https://webpack.js.org/guides/production/).
 
@@ -191,7 +184,7 @@ console.log(process.env.API_KEY); // prints the value of API_KEY from .env file
 
 You can find more information about the `dotenv-webpack` plugin and its options on its GitHub repository:
 
--   [https://github.com/mrsteele/dotenv-webpack](https://github.com/mrsteele/dotenv-webpack)
+- [https://github.com/mrsteele/dotenv-webpack](https://github.com/mrsteele/dotenv-webpack)
 
 ## webpack.prod.js
 
@@ -201,9 +194,9 @@ The `webpack.prod.js` file is a configuration file for Webpack that is used to b
 
 Some of the configuration options that would be used for a production webpack file and why are they used are:
 
--   `mode: 'production'`: This sets the mode to production, which enables various optimizations for the code, such as tree shaking, code splitting, minification, etc. ²
--   `devtool: 'source-map'`: This sets the devtool to source-map, which generates separate source map files for debugging the minimized code. ²
--   `optimization.minimize: true`: This tells webpack to minimize the bundle using the TerserPlugin or other plugins specified in `optimization.minimizer`. ¹
+- `mode: 'production'`: This sets the mode to production, which enables various optimizations for the code, such as tree shaking, code splitting, minification, etc. ²
+- `devtool: 'source-map'`: This sets the devtool to source-map, which generates separate source map files for debugging the minimized code. ²
+- `optimization.minimize: true`: This tells webpack to minimize the bundle using the TerserPlugin or other plugins specified in `optimization.minimizer`. ¹
 
 You can find more information about the `webpack.prod.js` file and its options at [Webpack's Production](https://webpack.js.org/guides/production/).
 
@@ -253,4 +246,4 @@ console.log(process.env.API_KEY); // prints the value of API_KEY from .env file
 
 You can find more information about the `dotenv-webpack` plugin and its options on its GitHub repository:
 
--   [https://github.com/mrsteele/dotenv-webpack](https://github.com/mrsteele/dotenv-webpack)
+- [https://github.com/mrsteele/dotenv-webpack](https://github.com/mrsteele/dotenv-webpack)
