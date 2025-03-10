@@ -20,7 +20,7 @@ import "./index.css";
 import App from "./App";
 import { store } from "./store/store";
 import { logErrorToServer } from "./utils/error";
-import { cognitoAuthConfig } from "./auth/authConfig";
+import { authConfig } from "./auth/authConfig";
 
 // React 18
 const container = document.getElementById("root") as HTMLElement;
@@ -35,7 +35,7 @@ try {
 			{/*
 			 * Setting up authentication using Amazon Cognito's OAuth/OpenID
 			 */}
-			<AuthProvider {...cognitoAuthConfig}>
+			<AuthProvider {...authConfig}>
 				{/*
 				 * Makes the Redux store available to any nested components that need to access to the store.
 				 * See https://react-redux.js.org/api/provider

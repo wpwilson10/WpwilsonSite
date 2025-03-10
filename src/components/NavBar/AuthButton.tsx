@@ -11,7 +11,11 @@ import { useAuth } from "../../auth/useAuth";
  * ```
  */
 const AuthButton = () => {
-	const { isAuthenticated, login, logout, user } = useAuth();
+	const { isAuthenticated, login, logout, user, isLoading } = useAuth();
+
+	if (isLoading) {
+		return null; // don't allow login until ready
+	}
 
 	return isAuthenticated ? (
 		<>
