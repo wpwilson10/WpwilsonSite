@@ -5,10 +5,8 @@
  *
  * This component displays an interface for managing smart light settings, including schedule
  * management and mode selection. The component allows users to:
- * - Switch between different lighting modes (Day/Night Cycle, Scheduled, Demo)
+ * - Switch between different lighting modes (Day/Night Cycle, Demo)
  * - View and edit the current light schedule
- * - Add new schedule entries with specific times and brightness levels
- * - Remove existing schedule entries
  * - Save changes to the server
  *
  * The component displays feedback notifications for successful or unsuccessful
@@ -28,17 +26,12 @@ import { ErrorFallback, logErrorBoundary } from "../../utils/error";
 import LoadingSpinner from "../LoadingSpinner/spinner";
 import DayNight from "./DayNight";
 import { ErrorBoundary } from "react-error-boundary";
-import { ScheduledEntryTable, AddScheduleEntry } from "./ScheduledEntryTable";
 import { ModeSelector } from "./ModeSelector/modeSelector";
 import { useScheduleHandlers } from "./hooks/useScheduleHandlers";
 import { useScheduleData } from "./hooks/useScheduleData";
 
 /**
  * The LightScheduler component that displays the light scheduler interface.
- *
- * This component allows the user to view and edit the light schedule, including adding,
- * removing, and updating schedule entries. The component also allows the user to switch
- * between different modes (dayNight, scheduled, demo) and save the changes to the server.
  *
  * @component
  * @returns {ReactElement} The LightScheduler component.
@@ -114,23 +107,6 @@ const LightScheduler = () => {
 							handleInputChange={handlers.handleNamedEntryChange}
 							handleTimeChange={handlers.handleTimeChange}
 						/>
-					)}
-
-					{state.data.mode === "scheduled" && (
-						<>
-							<ScheduledEntryTable
-								data={state.data}
-								handleInputChange={
-									handlers.handleScheduledEntryChange
-								}
-								handleRemoveRow={handlers.handleRemoveRow}
-							/>
-							<AddScheduleEntry
-								newEntry={state.newEntry}
-								onEntryChange={handlers.handleEntryChange}
-								onAddEntry={handlers.handleAddRow}
-							/>
-						</>
 					)}
 
 					{/* Buttons */}

@@ -1,5 +1,6 @@
 import { Table, Form } from "react-bootstrap";
 import { formatTime, handleNumericInput } from "../utils";
+import { getEntryByLabel } from "../models";
 import {
 	DaylightScheduleProps,
 	scheduleEntries,
@@ -30,61 +31,68 @@ export const DesktopView = ({
 				</tr>
 			</thead>
 			<tbody>
-				{scheduleEntries.map(({ key, label, editable }) => (
-					<tr key={key}>
-						<td>{label}</td>
-						<td>
-							{editable &&
-							handleTimeChange &&
-							isEditableTimeKey(key) ? (
+				{scheduleEntries.map(({ key, label, editable }) => {
+					const entry = getEntryByLabel(data.brightnessSchedule, key);
+					if (!entry) return null;
+					return (
+						<tr key={key}>
+							<td>{label}</td>
+							<td>
+								{editable &&
+								handleTimeChange &&
+								isEditableTimeKey(key) ? (
+									<Form.Control
+										type="time"
+										value={entry.time}
+										onChange={(e) =>
+											handleTimeChange(
+												key,
+												e.target.value
+											)
+										}
+										size="sm"
+									/>
+								) : (
+									formatTime(entry.time)
+								)}
+							</td>
+							<td>
 								<Form.Control
-									type="time"
-									value={data[key].time}
-									onChange={(e) =>
-										handleTimeChange(key, e.target.value)
-									}
+									type="number"
+									value={entry.warmBrightness}
+									min="0"
+									max="100"
 									size="sm"
+									onInput={handleNumericInput}
+									onChange={(e) =>
+										handleInputChange(
+											key,
+											"warmBrightness",
+											e.target.value
+										)
+									}
 								/>
-							) : (
-								formatTime(data[key].time)
-							)}
-						</td>
-						<td>
-							<Form.Control
-								type="number"
-								value={data[key].warmBrightness}
-								min="0"
-								max="100"
-								size="sm"
-								onInput={handleNumericInput}
-								onChange={(e) =>
-									handleInputChange(
-										data[key].unix_time,
-										"warmBrightness",
-										e.target.value
-									)
-								}
-							/>
-						</td>
-						<td>
-							<Form.Control
-								type="number"
-								value={data[key].coolBrightness}
-								min="0"
-								max="100"
-								size="sm"
-								onInput={handleNumericInput}
-								onChange={(e) =>
-									handleInputChange(
-										data[key].unix_time,
-										"coolBrightness",
-										e.target.value
-									)
-								}
-							/>
-						</td>
-					</tr>
-				))}
+							</td>
+							<td>
+								<Form.Control
+									type="number"
+									value={entry.coolBrightness}
+									min="0"
+									max="100"
+									size="sm"
+									onInput={handleNumericInput}
+									onChange={(e) =>
+										handleInputChange(
+											key,
+											"coolBrightness",
+											e.target.value
+										)
+									}
+								/>
+							</td>
+						</tr>
+					);
+				})}
 			</tbody>
 		</Table>
 	</div>

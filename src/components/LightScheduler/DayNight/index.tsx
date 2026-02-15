@@ -18,14 +18,7 @@ export const DayNight = ({
 	handleTimeChange,
 }: DaylightScheduleProps) => (
 	<>
-		<SunTimes
-			sunrise={data.sunrise}
-			sunset={data.sunset}
-			natural_sunset={data.natural_sunset}
-			civil_twilight_begin={data.civil_twilight_begin}
-			civil_twilight_end={data.civil_twilight_end}
-			natural_twilight_end={data.natural_twilight_end}
-		/>
+		<SunTimes brightnessSchedule={data.brightnessSchedule} />
 		<Container className="content-container mb-3 py-3 px-3">
 			<h5>Daylight Schedule</h5>
 			<div className="d-none d-md-block">

@@ -1,17 +1,12 @@
-import { ScheduleData, ScheduleEntry } from "../models";
+import { ScheduleData, BrightnessEntry } from "../models";
 
 /**
  * Props for the DaylightSchedule component and its views.
- *
- * @interface DaylightScheduleProps
- * @property {ScheduleData} data - The complete schedule data containing all entries
- * @property {Function} handleInputChange - Callback function to handle brightness value changes
- * @property {Function} [handleTimeChange] - Optional callback function to handle time changes for editable entries
  */
 export interface DaylightScheduleProps {
 	data: ScheduleData;
 	handleInputChange: (
-		unix_time: number,
+		label: string,
 		field: "warmBrightness" | "coolBrightness",
 		value: string
 	) => void;
@@ -20,40 +15,16 @@ export interface DaylightScheduleProps {
 
 /**
  * Props for the SunTimes component.
- *
- * @interface SunTimesProps
- * @property {ScheduleEntry} sunrise - The sunrise entry
- * @property {ScheduleEntry} sunset - The sunset entry
- * @property {ScheduleEntry} natural_sunset - The natural sunset entry
- * @property {ScheduleEntry} civil_twilight_begin - The civil twilight begin entry
- * @property {ScheduleEntry} civil_twilight_end - The civil twilight end entry
- * @property {ScheduleEntry} natural_twilight_end - The natural twilight end entry
  */
 export interface SunTimesProps {
-	sunrise: ScheduleEntry;
-	sunset: ScheduleEntry;
-	natural_sunset: ScheduleEntry;
-	civil_twilight_begin: ScheduleEntry;
-	civil_twilight_end: ScheduleEntry;
-	natural_twilight_end: ScheduleEntry;
+	brightnessSchedule: BrightnessEntry[];
 }
 
 /**
  * Schedule entry definition with label and editability flag.
- *
- * @interface ScheduleEntryDefinition
- * @property {keyof ScheduleData} key - The key in the ScheduleData object
- * @property {string} label - The display label for the entry
- * @property {boolean} editable - Whether the time can be edited
  */
 export interface ScheduleEntryDefinition {
-	key:
-		| "civil_twilight_begin"
-		| "sunrise"
-		| "sunset"
-		| "civil_twilight_end"
-		| "bed_time"
-		| "night_time";
+	key: string;
 	label: string;
 	editable: boolean;
 }

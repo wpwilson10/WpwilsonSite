@@ -2,6 +2,7 @@ import { useEffect, useReducer, useCallback } from "react";
 import axios from "axios";
 import { lightSchedulerReducer, initialState } from "../reducer";
 import { ScheduleData } from "../models";
+import { isValidScheduleData } from "../utils";
 import { handleAxiosError } from "../../../utils/error";
 
 // The server URL for the light schedule API.
@@ -21,8 +22,8 @@ export const useScheduleData = () => {
 
 		try {
 			const response = await axios.get<ScheduleData>(lightScheduleURL);
-			if (!response.data) {
-				throw new Error("Failed to load schedule data");
+			if (!response.data || !isValidScheduleData(response.data)) {
+				throw new Error("Invalid schedule data received from server");
 			}
 			dispatch({ type: "SET_DATA", payload: response.data });
 			dispatch({ type: "SET_LAST_SAVED", payload: response.data });
@@ -37,7 +38,8 @@ export const useScheduleData = () => {
 	// Save schedule to the API
 	const saveSchedule = async () => {
 		try {
-			await axios.post(lightScheduleURL, state.data, {
+			const { serverTime, ...postBody } = state.data;
+			await axios.post(lightScheduleURL, postBody, {
 				headers: {
 					"content-type": "application/json",
 					"x-custom-auth": awsSecretToken,

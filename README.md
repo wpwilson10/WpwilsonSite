@@ -22,8 +22,8 @@ WpwilsonSite is a modern, responsive, and secure single-page application (SPA) b
 - **Contact Module:**  
   This module provides a comprehensive Contact Page that displays the website owner’s contact details (including GitHub, LinkedIn, and email links) alongside a secure, reCAPTCHA-protected contact form. User inquiries are submitted directly through the Contact Form API, as maintained in the [contact-form-service](https://github.com/wpwilson10/contact-form-service).
 
-- **Light Scheduler Module:**  
-  This module offers an advanced Light Scheduler interface that enables users to manage smart lighting configurations. It supports various operating modes (day/night, scheduled, demo) and provides real-time feedback on light settings by communicating with the Light Schedule API from the [light-schedule-service](https://github.com/wpwilson10/light-schedule-service).
+- **Light Scheduler Module:**
+  This module offers an advanced Light Scheduler interface that enables users to manage smart lighting configurations. It supports day/night and demo operating modes, and provides real-time feedback on light settings by communicating with the Light Schedule API from the [light-schedule-service](https://github.com/wpwilson10/light-schedule-service). The dayNight UI displays sunrise/sunset times from geolocation, allows editing brightness levels for each time-of-day event (dawn, sunrise, sunset, dusk, bedtime, night), and supports editable bed/night times.
 
 Additional integrations include:
 

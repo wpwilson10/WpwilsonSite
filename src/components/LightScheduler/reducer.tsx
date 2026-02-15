@@ -4,11 +4,6 @@ import { defaultScheduleData, ScheduleData } from "./models";
 export type SchedulerState = {
 	data: ScheduleData;
 	lastSavedData: ScheduleData;
-	newEntry: {
-		time: string;
-		warmBrightness: string;
-		coolBrightness: string;
-	};
 	status: {
 		unsavedChanges: boolean;
 		isSuccessfullySubmitted: boolean;
@@ -25,21 +20,12 @@ export type SchedulerAction =
 	| { type: "SET_SUCCESS"; payload: boolean }
 	| { type: "SET_ERROR"; payload: boolean }
 	| { type: "RESET" }
-	| {
-			type: "UPDATE_NEW_ENTRY";
-			payload: Partial<SchedulerState["newEntry"]>;
-	  }
 	| { type: "SET_MODE"; payload: "dayNight" | "scheduled" | "demo" };
 
 // Initial state
 export const initialState: SchedulerState = {
 	data: defaultScheduleData,
 	lastSavedData: defaultScheduleData,
-	newEntry: {
-		time: "",
-		warmBrightness: "",
-		coolBrightness: "",
-	},
 	status: {
 		unsavedChanges: false,
 		isSuccessfullySubmitted: false,
@@ -94,11 +80,6 @@ export const lightSchedulerReducer = (
 				...state,
 				data: state.lastSavedData,
 				status: { ...state.status, unsavedChanges: false },
-			};
-		case "UPDATE_NEW_ENTRY":
-			return {
-				...state,
-				newEntry: { ...state.newEntry, ...action.payload },
 			};
 		case "SET_MODE":
 			return {
