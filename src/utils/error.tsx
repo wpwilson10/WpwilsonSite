@@ -25,7 +25,8 @@ const awsSecretToken: string = process.env.AWS_LOGGING_SECRET_TOKEN!;
  * @property {string} message - The human-readable error message describing what went wrong
  * @property {string} [stack] - The stack trace showing where the error occurred (if available)
  * @property {string} [componentStack] - React component tree stack trace (for React errors)
- * @property {string} service_name - The name/URL of the service where the error occurred
+ * @property {string} service_name - The identifier of the service where the error occurred
+ * @property {string} client_name - The client type (e.g., "browser")
  * @property {Object} [clientInfo] - Information about the client environment
  * @property {string} clientInfo.userAgent - The browser's user agent string
  * @property {string} clientInfo.url - The URL where the error occurred
@@ -37,6 +38,7 @@ export interface IError {
   stack: string | undefined; // Non-standard property that should be supported by most browsers
   componentStack: string | undefined; // Used by react error boundary
   service_name: string;
+  client_name: string;
   clientInfo?: {
     userAgent: string;
     url: string;
@@ -69,7 +71,8 @@ export const logErrorBoundary = (error: Error, info: ErrorInfo) => {
     message: error.message,
     stack: error?.stack,
     componentStack: info.componentStack ?? undefined,
-    service_name: errorURL,
+    service_name: 'wpwilsonsite',
+    client_name: 'browser',
     clientInfo: getClientInfo(),
   };
 
@@ -100,7 +103,8 @@ export const logErrorToServer = (error: any, info: string) => {
     level: 'ERROR',
     stack: error?.stack,
     componentStack: undefined,
-    service_name: errorURL,
+    service_name: 'wpwilsonsite',
+    client_name: 'browser',
     clientInfo: getClientInfo(),
   };
 
